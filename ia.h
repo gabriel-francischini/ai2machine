@@ -264,9 +264,9 @@ class machine{
 	int registers[REGISTERS_AMOUNT];
 	
 	public:
-		void getTicket(int number);
+		int getTicket(int number);
 		int getTicket();
-		void execute(char instruction, int *value1, int *value2);
+		int execute(unsigned char instruction, int *value1, int *value2);
 		bool chkm(int address);
 		bool chkr(int address);
 		void printMemory();
@@ -275,7 +275,7 @@ class machine{
 		int memory_limit;
 		char *getMemory();
 		int *getRegisters();
-		void saveChanges(char instruction, int value_1, int value_2, int *value1, int* value2);
+		void saveChanges(unsigned char instruction, int value_1, int value_2, int *value1, int* value2);
 
 		machine(){
 			this->memory_limit = (int) MEM_LEN;
@@ -315,9 +315,11 @@ void machine::printMemory(){
 
 // Function to execute int number of
 // "machine" instructions
-void machine::getTicket(int number){
-	for(int i=0;i<=number;i++)
-		this->getTicket();
+int machine::getTicket(int number){
+	for(int i=0;i<=number;i++){
+		if(this->getTicket() == ERROR_SIGNAL)
+			return ERROR_SIGNAL;	
+	}
 }
 
 
@@ -406,7 +408,7 @@ int machine::getTicket(){
 	}
 	
 	else{
-		unsigned int instruction = (unsigned int) *vins[0];
+		unsigned char instruction = (unsigned char) *vins[0];
 		
 		switch(instruction){
 		
@@ -430,7 +432,7 @@ int machine::getTicket(){
 			case RCR_REG_REG:
 				*ip += 3;
 				if(reg[1] && reg[2]){
-					this->execute(instruction, vreg[1], vreg[2]);
+					return this->execute(instruction, vreg[1], vreg[2]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -448,7 +450,7 @@ int machine::getTicket(){
 			case XOR_REG_MEM:
 				*ip += 3;
 				if(reg[1] && mem[2]){
-					this->execute(instruction, vreg[1], (int*) vmem[2]);
+					return this->execute(instruction, vreg[1], (int*) vmem[2]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -470,7 +472,7 @@ int machine::getTicket(){
 			case RCR_MEM_REG:
 				*ip += 3;
 				if(mem[1] && reg[2]){
-					this->execute(instruction, (int*) vmem[1], vreg[2]);
+					return this->execute(instruction, (int*) vmem[1], vreg[2]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -493,7 +495,7 @@ int machine::getTicket(){
 			case RCR_REG_VALUE:
 				*ip += 3;
 				if(reg[1] && ins[2]){
-					this->execute(instruction, vreg[1], (int*) vins[2]);
+					return this->execute(instruction, vreg[1], (int*) vins[2]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -514,7 +516,7 @@ int machine::getTicket(){
 			case RCR_MEM_VALUE:
 				*ip += 3;
 				if(mem[1] && ins[2]){
-					this->execute(instruction, (int*) vmem[1], (int*) vins[2]);
+					return this->execute(instruction, (int*) vmem[1], (int*) vins[2]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -523,7 +525,7 @@ int machine::getTicket(){
 			case PUSH_REG:
 				*ip += 2;
 				if(sp[1] && reg[1]){
-					this->execute(instruction, vsp[1], vreg[2]);
+					return this->execute(instruction, vsp[1], vreg[2]);
 					*sp += 1;
 				}
 				else
@@ -533,7 +535,7 @@ int machine::getTicket(){
 			case PUSH_MEM:
 				*ip += 2;
 				if(sp[1] && mem[1]){
-					this->execute(instruction, vsp[1], (int*) vmem[2]);
+					return this->execute(instruction, vsp[1], (int*) vmem[2]);
 					*sp += 1;
 				}
 				else
@@ -543,7 +545,7 @@ int machine::getTicket(){
 			case PUSH_VALUE:
 				*ip += 2;
 				if(sp[1] && ins[1]){
-					this->execute(instruction, vsp[1], (int*) vins[1]);
+					return this->execute(instruction, vsp[1], (int*) vins[1]);
 					*sp += 1;
 				}
 				else
@@ -553,7 +555,7 @@ int machine::getTicket(){
 			case PUSH_FLAGS:
 				*ip += 2;
 				if(sp[1]){
-					this->execute(instruction, vsp[1], flags);
+					return this->execute(instruction, vsp[1], flags);
 					*sp += 1;
 				}
 				else
@@ -563,7 +565,7 @@ int machine::getTicket(){
 			case POP_REG:
 				*ip += 2;
 				if(sp[0] && reg[1]){
-					this->execute(instruction, vreg[1], vsp[0]);
+					return this->execute(instruction, vreg[1], vsp[0]);
 					*sp -= 1;
 				}
 				else
@@ -573,7 +575,7 @@ int machine::getTicket(){
 			case POP_MEM:
 				*ip += 2;
 				if(sp[0] && mem[1]){
-					this->execute(instruction, (int*) vmem[1], vsp[0]);
+					return this->execute(instruction, (int*) vmem[1], vsp[0]);
 					*sp -= 1;
 				}
 				else
@@ -583,7 +585,7 @@ int machine::getTicket(){
 			case POP_FLAGS:
 				*ip += 2;
 				if(sp[0]){
-					this->execute(instruction, flags, vsp[0]);
+					return this->execute(instruction, flags, vsp[0]);
 					*sp -= 1;
 				}
 				else
@@ -599,7 +601,7 @@ int machine::getTicket(){
 					int value2 = 1;
 					if(instruction == NEG_REG)
 						value2 = -1;
-					this->execute(instruction, vreg[1], &value2);
+					return this->execute(instruction, vreg[1], &value2);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -614,7 +616,7 @@ int machine::getTicket(){
 					int value2 = 1;
 					if(instruction == NEG_MEM)
 						value2 = -1;
-					this->execute(instruction, (int*) vmem[1], &value2);
+					return this->execute(instruction, (int*) vmem[1], &value2);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -648,9 +650,9 @@ int machine::getTicket(){
 				*ip += 2;
 				if(reg[1]){
 					if( instruction == JUMP_REG )
-						this->execute(instruction, ip, vreg[1]);
+						return this->execute(instruction, ip, vreg[1]);
 					else
-						this->execute(instruction, vreg[1], vreg[1]);
+						return this->execute(instruction, vreg[1], vreg[1]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -659,7 +661,7 @@ int machine::getTicket(){
 			case CALL_REG:
 				*ip += 2;
 				if(reg[1] && sp[1]){
-					this->execute(instruction, vsp[1], reg[1])
+					return this->execute(instruction, vsp[1], vreg[1]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -693,9 +695,9 @@ int machine::getTicket(){
 				*ip += 2;
 				if(mem[1]){
 					if( instruction == JUMP_MEM )
-						this->execute(instruction, ip, (int*) vmem[1]);
+						return this->execute(instruction, ip, (int*) vmem[1]);
 					else
-						this->execute(instruction, (int*) vmem[1], (int*) vmem[1]);
+						return this->execute(instruction, (int*) vmem[1], (int*) vmem[1]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -704,7 +706,7 @@ int machine::getTicket(){
 			case CALL_MEM:
 				*ip += 2;
 				if(mem[1] && sp[1]){
-					this->execute(instruction, vsp[1], mem[1])
+					return this->execute(instruction, vsp[1], (int *) vmem[1]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -713,7 +715,7 @@ int machine::getTicket(){
 			case RET:
 				*ip += 1;
 				if(sp[0]){
-					this->execute(RET, ip, (int *) vsp[0]);
+					return this->execute(RET, ip, (int *) vsp[0]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -722,7 +724,7 @@ int machine::getTicket(){
 			case INT_VALUE:
 				*ip += 2;
 				if(ins[1]){
-					this->execute(INT_VALUE, (int*) vins[1], (int*) vins[1]);
+					return this->execute(INT_VALUE, (int*) vins[1], (int*) vins[1]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -753,7 +755,7 @@ int machine::getTicket(){
 			case JNE_MEM:
 				ip += 2;
 				if(mem[1]){
-					this->execute(instruction, ip, (int *) vmem[1]);
+					return this->execute(instruction, ip, (int *) vmem[1]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -785,7 +787,7 @@ int machine::getTicket(){
 			case JNE_VALUE:
 				ip += 2;
 				if(ins[1]){
-					this->execute(instruction, ip, (int *) vins[1]);
+					return this->execute(instruction, ip, (int *) vins[1]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -803,7 +805,7 @@ int machine::getTicket(){
 }
 
 
-void machine::execute(char instruction, int *value1, int *value2){
+int machine::execute(unsigned char instruction, int *value1, int *value2){
 	int *flags = &this->registers[2];
 	int *ip = &this->registers[0];
 
@@ -849,28 +851,28 @@ void machine::execute(char instruction, int *value1, int *value2){
 			int value_1_copy = value_1;
 			if (temp < (value_1 + value_2))
 				if((instruction != INC_REG) && (instruction != INC_MEM))
-					SETFLAG(flags, CARRY_FLAG);
+					SETFLAG(*flags, CARRY_FLAG);
 			unsigned char temp2 = value_1 + value_2;
 			
 			if(temp2 < temp)
-				SETFLAG(flags, OVERFLOW_FLAG);
+				SETFLAG(*flags, OVERFLOW_FLAG);
 			else
-				UNSETFLAG(flags, OVERFLOW_FLAG);
+				UNSETFLAG(*flags, OVERFLOW_FLAG);
 
 			if(temp < 0)
-				SETFLAG(flags, SIGN_FLAG);
+				SETFLAG(*flags, SIGN_FLAG);
 			else
-				UNSETFLAG(flags, SIGN_FLAG);
+				UNSETFLAG(*flags, SIGN_FLAG);
 
 			if(temp == 0)
-				SETFLAG(flags, ZERO_FLAG);
+				SETFLAG(*flags, ZERO_FLAG);
 			else
-				UNSETFLAG(flags, ZERO_FLAG);
+				UNSETFLAG(*flags, ZERO_FLAG);
 
 			if((temp%16) > 10)
-				SETFLAG(flags, AUXILIARY_CARRY_FLAG);
+				SETFLAG(*flags, AUXILIARY_CARRY_FLAG);
 			else
-				UNSETFLAG(flags, AUXILIARY_CARRY_FLAG);
+				UNSETFLAG(*flags, AUXILIARY_CARRY_FLAG);
 
 
 			int parity = 0;
@@ -880,9 +882,9 @@ void machine::execute(char instruction, int *value1, int *value2){
 			}
 
 			if(parity%2)
-				SETFLAG(flags, PARITY_FLAG);
+				SETFLAG(*flags, PARITY_FLAG);
 			else
-				UNSETFLAG(flags, PARITY_FLAG);
+				UNSETFLAG(*flags, PARITY_FLAG);
 
 			value_1 += value_2;
 			if((instruction == XADD_REG_REG) || (instruction == XADD_MEM_REG))
@@ -910,41 +912,42 @@ void machine::execute(char instruction, int *value1, int *value2){
 			unsigned char unsigned_result_char = (unsigned char) (value_1 - value_2);
 
 			if(result == 0)
-				SETFLAG(flags, ZERO_FLAG);
+				SETFLAG(*flags, ZERO_FLAG);
 			else
-				UNSETFLAG(flags, ZERO_FLAG);
+				UNSETFLAG(*flags, ZERO_FLAG);
 
 			if(result_char < 0)
-				SETFLAG(flags, SIGN_FLAG);
+				SETFLAG(*flags, SIGN_FLAG);
 			else
-				UNSETFLAG(flags, SIGN_FLAG);
+				UNSETFLAG(*flags, SIGN_FLAG);
 
 			if(result != result_char)
-				SETFLAG(flags, OVERFLOW_FLAG);
+				SETFLAG(*flags, OVERFLOW_FLAG);
 			else
-				UNSETFLAG(flags, OVERFLOW_FLAG);
+				UNSETFLAG(*flags, OVERFLOW_FLAG);
 
 			if((result_char & 0xF) > 9)
-				SETFLAG(flags, AUXILIARY_CARRY_FLAG);
+				SETFLAG(*flags, AUXILIARY_CARRY_FLAG);
 			else
-				UNSETFLAG(flags, AUXILIARY_CARRY_FLAG);
+				UNSETFLAG(*flags, AUXILIARY_CARRY_FLAG);
 
 			int parity = 0;
+			int temp = result;
 			for(int i=0; i<8;i++){
 				if(temp & (1<<i)) 
 					parity += 1;
 			}
 
 			if(parity%2)
-				SETFLAG(flags, PARITY_FLAG);
+				SETFLAG(*flags, PARITY_FLAG);
 			else
-				UNSETFLAG(flags, PARITY_FLAG);
+				UNSETFLAG(*flags, PARITY_FLAG);
 
 
 			if(unsigned_result_char != result_char)
-				SETFLAG(flags, CARRY_FLAG);
+				SETFLAG(*flags, CARRY_FLAG);
 			else
-				UNSETFLAG(flags, CARRY_FLAG);
+				UNSETFLAG(*flags, CARRY_FLAG);
 
 			if((instruction != CMP_REG_REG) || 
 			   (instruction != CMP_REG_MEM) ||
@@ -961,8 +964,130 @@ void machine::execute(char instruction, int *value1, int *value2){
 		case NEG_REG:
 		case NEG_MEM:
 		{
+			int result = 0 - value_1;
+
+			if(value_1 == 0)
+				UNSETFLAG(*flags, CARRY_FLAG);
+			else
+				SETFLAG(*flags, CARRY_FLAG);
+
+			if((!value_1) == 0)
+				SETFLAG(*flags, OVERFLOW_FLAG);
+			else
+				UNSETFLAG(*flags, OVERFLOW_FLAG);
+
+			if(result == 0)
+				SETFLAG(*flags, ZERO_FLAG);
+			else
+				UNSETFLAG(*flags, ZERO_FLAG);
+
+			if(result < 0)
+				SETFLAG(*flags, SIGN_FLAG);
+			else
+				UNSETFLAG(*flags, SIGN_FLAG);
+
+			int parity = 0;
+			int temp = result;
+			for(int i=0; i<8;i++){
+				if(temp & (1<<i)) 
+					parity += 1;
+			}
+
+			if(parity%2)
+				SETFLAG(*flags, PARITY_FLAG);
+			else
+				UNSETFLAG(*flags, PARITY_FLAG);
+
+			if((result & 0xF) > 9)
+				SETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, AUXILIARY_CARRY_FLAG);
 
 
+			value_1 = result;
+		}
+
+		break;
+
+
+		case MUL_REG_MEM:
+		case MUL_REG_REG:
+		case MUL_REG_VALUE:
+		{
+			value_1 = value_1 * value_2;
+
+			if(rand()%2)
+				SETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, PARITY_FLAG);
+			else
+				UNSETFLAG(*flags, PARITY_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, SIGN_FLAG);
+			else
+				UNSETFLAG(*flags, SIGN_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, ZERO_FLAG);
+			else
+				UNSETFLAG(*flags, ZERO_FLAG);
+
+
+
+		}
+
+		break;
+
+
+
+		case DIV_REG_REG:
+		case DIV_REG_MEM:
+		case DIV_REG_VALUE:
+		{
+			if(value_2 == 0)
+				return ERROR_SIGNAL;
+			else{
+				int result = value_1/value2;
+				int remainder = value_1%value_2;
+
+				value_1 = result;
+				value_2 = remainder;
+
+			if(rand()%2)
+				SETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, PARITY_FLAG);
+			else
+				UNSETFLAG(*flags, PARITY_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, SIGN_FLAG);
+			else
+				UNSETFLAG(*flags, SIGN_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, ZERO_FLAG);
+			else
+				UNSETFLAG(*flags, ZERO_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, OVERFLOW_FLAG);
+			else
+				UNSETFLAG(*flags, OVERFLOW_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, CARRY_FLAG);
+
+			}
 		}
 
 		break;
@@ -978,7 +1103,7 @@ void machine::execute(char instruction, int *value1, int *value2){
 }
 
 
-void machine::saveChanges(char instruction, int value_1, int value_2, int *value1, int* value2){
+void machine::saveChanges(unsigned char instruction, int value_1, int value_2, int *value1, int* value2){
 
 	switch(instruction){
 
