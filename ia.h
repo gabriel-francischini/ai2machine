@@ -1051,7 +1051,7 @@ int machine::execute(unsigned char instruction, int *value1, int *value2){
 			if(value_2 == 0)
 				return ERROR_SIGNAL;
 			else{
-				int result = value_1/value2;
+				int result = value_1/value_2;
 				int remainder = value_1%value_2;
 
 				value_1 = result;
@@ -1093,6 +1093,440 @@ int machine::execute(unsigned char instruction, int *value1, int *value2){
 		break;
 
 
+
+
+		case AND_REG_REG:
+		case AND_REG_MEM:
+		case AND_MEM_REG:
+		case AND_REG_VALUE:
+		case AND_MEM_VALUE:
+		{
+			unsigned int result = ((unsigned int) value_1) & ((unsigned int) value_2);
+			value_1 = result;
+
+			UNSETFLAG(*flags, CARRY_FLAG);
+			UNSETFLAG(*flags, OVERFLOW_FLAG);
+			if(result)
+				UNSETFLAG(*flags, ZERO_FLAG);
+			else
+				SETFLAG(*flags, ZERO_FLAG);
+
+			if((result >> 7))
+				SETFLAG(*flags, SIGN_FLAG);
+			else
+				UNSETFLAG(*flags, SIGN_FLAG);
+
+			int parity = 0;
+			int temp = result;
+			for(int i=0; i<8;i++){
+				if(temp & (1<<i)) 
+					parity += 1;
+			}
+
+			if(parity%2)
+				SETFLAG(*flags, PARITY_FLAG);
+			else
+				UNSETFLAG(*flags, PARITY_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+
+
+		}
+
+		break;
+
+
+		case OR_REG_REG:
+		case OR_REG_MEM:
+		case OR_MEM_REG:
+		case OR_REG_VALUE:
+		case OR_MEM_VALUE:
+		{
+			unsigned int result = ((unsigned int) value_1) || ((unsigned int) value_2);
+			value_1 = result;
+
+			UNSETFLAG(*flags, CARRY_FLAG);
+			UNSETFLAG(*flags, OVERFLOW_FLAG);
+			if(result)
+				UNSETFLAG(*flags, ZERO_FLAG);
+			else
+				SETFLAG(*flags, ZERO_FLAG);
+
+			if((result >> 7))
+				SETFLAG(*flags, SIGN_FLAG);
+			else
+				UNSETFLAG(*flags, SIGN_FLAG);
+
+			int parity = 0;
+			int temp = result;
+			for(int i=0; i<8;i++){
+				if(temp & (1<<i)) 
+					parity += 1;
+			}
+
+			if(parity%2)
+				SETFLAG(*flags, PARITY_FLAG);
+			else
+				UNSETFLAG(*flags, PARITY_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+
+
+		}
+
+		break;
+
+
+		case XOR_REG_REG:
+		case XOR_REG_MEM:
+		case XOR_MEM_REG:
+		case XOR_REG_VALUE:
+		case XOR_MEM_VALUE:
+		{
+			unsigned int result = ((unsigned int) value_1) ^ ((unsigned int) value_2);
+			value_1 = result;
+
+			UNSETFLAG(*flags, CARRY_FLAG);
+			UNSETFLAG(*flags, OVERFLOW_FLAG);
+			if(result)
+				UNSETFLAG(*flags, ZERO_FLAG);
+			else
+				SETFLAG(*flags, ZERO_FLAG);
+
+			if((result >> 7))
+				SETFLAG(*flags, SIGN_FLAG);
+			else
+				UNSETFLAG(*flags, SIGN_FLAG);
+
+			int parity = 0;
+			int temp = result;
+			for(int i=0; i<8;i++){
+				if(temp & (1<<i)) 
+					parity += 1;
+			}
+
+			if(parity%2)
+				SETFLAG(*flags, PARITY_FLAG);
+			else
+				UNSETFLAG(*flags, PARITY_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+
+
+		}
+
+		break;
+
+
+
+
+		case NOT_REG:
+		case NOT_MEM:
+		{
+			unsigned int result = !((unsigned int) value_1);
+			value_1 = result;
+
+
+		}
+
+		break;
+
+
+		case SHL_REG_REG:
+		case SHL_MEM_REG:
+		case SHL_REG_VALUE:
+		case SHL_MEM_VALUE:
+		{
+
+			int result = value_1;
+			int last_bit_shifted;
+
+			for(int i=0; i<value_2; i++){
+				last_bit_shifted = result & (1<<7);
+				result = result << 1;
+			}
+
+
+			if(last_bit_shifted)
+				SETFLAG(*flags, CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, CARRY_FLAG);
+
+			if( ((result > 0) && (value_1 < 0)) || ((result<0) && (value_1 > 0)) )
+				SETFLAG(*flags, OVERFLOW_FLAG);
+			else
+				UNSETFLAG(*flags, OVERFLOW_FLAG);
+
+			if(result)
+				UNSETFLAG(*flags, ZERO_FLAG);
+			else
+				SETFLAG(*flags, ZERO_FLAG);
+
+			if(result < 0)
+				SETFLAG(*flags, SIGN_FLAG);
+			else
+				UNSETFLAG(*flags, SIGN_FLAG);
+
+			int parity = 0;
+			int temp = result;
+			for(int i=0; i<8;i++){
+				if(temp & (1<<i)) 
+					parity += 1;
+			}
+
+			if(parity%2)
+				SETFLAG(*flags, PARITY_FLAG);
+			else
+				UNSETFLAG(*flags, PARITY_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+
+		}
+
+		break;
+
+
+
+		case SHR_REG_REG:
+		case SHR_MEM_REG:
+		case SHR_REG_VALUE:
+		case SHR_MEM_VALUE:
+		{
+
+			int result = value_1;
+			int last_bit_shifted;
+
+			for(int i=0; i<value_2; i++){
+				last_bit_shifted = result & (0x1);
+				result = result >> 1;
+			}
+
+			if(last_bit_shifted)
+				SETFLAG(*flags, CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, CARRY_FLAG);
+
+			if( ((result > 0) && (value_1 < 0)) || ((result<0) && (value_1 > 0)) )
+				SETFLAG(*flags, OVERFLOW_FLAG);
+			else
+				UNSETFLAG(*flags, OVERFLOW_FLAG);
+
+			if(result)
+				UNSETFLAG(*flags, ZERO_FLAG);
+			else
+				SETFLAG(*flags, ZERO_FLAG);
+
+			if(result < 0)
+				SETFLAG(*flags, SIGN_FLAG);
+			else
+				UNSETFLAG(*flags, SIGN_FLAG);
+
+			int parity = 0;
+			int temp = result;
+			for(int i=0; i<8;i++){
+				if(temp & (1<<i)) 
+					parity += 1;
+			}
+
+			if(parity%2)
+				SETFLAG(*flags, PARITY_FLAG);
+			else
+				UNSETFLAG(*flags, PARITY_FLAG);
+
+			if(rand()%2)
+				SETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, AUXILIARY_CARRY_FLAG);
+
+		}
+
+
+		break;
+
+		case RCL_REG_REG:
+		case RCL_MEM_REG:
+		case RCL_REG_VALUE:
+		case RCL_MEM_VALUE:
+		{
+			int result = value_1;
+			int last_bit_shifted;
+
+			for(int i=0; i<value_2; i++){
+				last_bit_shifted = result & (1<<7);
+				result = result << 1;
+				result += GETFLAG(*flags, CARRY_FLAG);
+
+				if(last_bit_shifted)
+					SETFLAG(*flags, CARRY_FLAG);
+				else
+					UNSETFLAG(*flags, CARRY_FLAG);
+			}
+
+			if(last_bit_shifted)
+				SETFLAG(*flags, CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, CARRY_FLAG);
+
+			if(value_2 == 1){
+				if( ((result > 0) && (value_1 < 0)) || ((result<0) && (value_1 > 0)) )
+					SETFLAG(*flags, OVERFLOW_FLAG);
+				else
+					UNSETFLAG(*flags, OVERFLOW_FLAG);
+			}
+			else{
+			if(rand()%2)
+				SETFLAG(*flags, OVERFLOW_FLAG);
+			else
+				UNSETFLAG(*flags, OVERFLOW_FLAG);			
+			}
+
+
+
+		}
+
+		break;
+
+
+		case RCR_REG_REG:
+		case RCR_MEM_REG:
+		case RCR_REG_VALUE:
+		case RCR_MEM_VALUE:
+		{
+			int result = value_1;
+			int last_bit_shifted;
+
+			for(int i=0; i<value_2; i++){
+				last_bit_shifted = result & (0x1);
+				result = result >> 1;
+				result += (GETFLAG(*flags, CARRY_FLAG) << 7);
+
+				if(last_bit_shifted)
+					SETFLAG(*flags, CARRY_FLAG);
+				else
+					UNSETFLAG(*flags, CARRY_FLAG);
+			}
+
+			if(last_bit_shifted)
+				SETFLAG(*flags, CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, CARRY_FLAG);
+
+			if(value_2 == 1){
+				if( ((result > 0) && (value_1 < 0)) || ((result<0) && (value_1 > 0)) )
+					SETFLAG(*flags, OVERFLOW_FLAG);
+				else
+					UNSETFLAG(*flags, OVERFLOW_FLAG);
+			}
+			else{
+			if(rand()%2)
+				SETFLAG(*flags, OVERFLOW_FLAG);
+			else
+				UNSETFLAG(*flags, OVERFLOW_FLAG);			
+			}
+
+
+
+		}
+
+		break;
+
+
+
+
+
+
+
+
+
+
+		case ROL_REG_REG:
+		case ROL_MEM_REG:
+		case ROL_REG_VALUE:
+		case ROL_MEM_VALUE:
+		{
+			int result = value_1;
+			int last_bit_shifted;
+
+			for(int i=0; i<value_2; i++){
+				last_bit_shifted = result & (1<<7);
+				result = result << 1;
+				result += last_bit_shifted;
+			}
+
+			if(last_bit_shifted)
+				SETFLAG(*flags, CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, CARRY_FLAG);
+
+			if(value_2 == 1){
+				if( ((result > 0) && (value_1 < 0)) || ((result<0) && (value_1 > 0)) )
+					SETFLAG(*flags, OVERFLOW_FLAG);
+				else
+					UNSETFLAG(*flags, OVERFLOW_FLAG);
+			}
+			else{
+			if(rand()%2)
+				SETFLAG(*flags, OVERFLOW_FLAG);
+			else
+				UNSETFLAG(*flags, OVERFLOW_FLAG);			
+			}
+
+
+
+		}
+
+		break;
+
+
+		case ROR_REG_REG:
+		case ROR_MEM_REG:
+		case ROR_REG_VALUE:
+		case ROR_MEM_VALUE:
+		{
+			int result = value_1;
+			int last_bit_shifted;
+
+			for(int i=0; i<value_2; i++){
+				last_bit_shifted = result & (0x1);
+				result = result >> 1;
+				result += (last_bit_shifted << 7);
+			}
+
+			if(last_bit_shifted)
+				SETFLAG(*flags, CARRY_FLAG);
+			else
+				UNSETFLAG(*flags, CARRY_FLAG);
+
+			if(value_2 == 1){
+				if( ((result > 0) && (value_1 < 0)) || ((result<0) && (value_1 > 0)) )
+					SETFLAG(*flags, OVERFLOW_FLAG);
+				else
+					UNSETFLAG(*flags, OVERFLOW_FLAG);
+			}
+			else{
+			if(rand()%2)
+				SETFLAG(*flags, OVERFLOW_FLAG);
+			else
+				UNSETFLAG(*flags, OVERFLOW_FLAG);			
+			}
+
+
+
+		}
+
+		break;
 
 
 	}
