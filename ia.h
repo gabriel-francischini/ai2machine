@@ -256,6 +256,8 @@ class gene;
 // implements a processor-like
 // machine (a turing machine)
 class machine{
+	
+	protected:
 	char memory[MEM_SPACE];
 	
 	// The size of a char is (in my machine) one byte,
@@ -278,7 +280,7 @@ class machine{
 		void saveChanges(unsigned char instruction, int value_1, int value_2, int *value1, int* value2);
 
 		machine(){
-			this->memory_limit = (int) MEM_LEN;
+			this->memory_limit = (int) (MEM_SPACE-1);
 		}
 		
 };
@@ -650,7 +652,7 @@ int machine::getTicket(){
 				*ip += 2;
 				if(reg[1]){
 					if( instruction == JUMP_REG )
-						return this->execute(instruction, ip, vreg[1]);
+						return this->execute(instruction, vreg[1], ip);
 					else
 						return this->execute(instruction, vreg[1], vreg[1]);
 				}
@@ -662,6 +664,7 @@ int machine::getTicket(){
 				*ip += 2;
 				if(reg[1] && sp[1]){
 					return this->execute(instruction, vsp[1], vreg[1]);
+					*sp += 1;
 				}
 				else
 					return ERROR_SIGNAL;
@@ -695,7 +698,7 @@ int machine::getTicket(){
 				*ip += 2;
 				if(mem[1]){
 					if( instruction == JUMP_MEM )
-						return this->execute(instruction, ip, (int*) vmem[1]);
+						return this->execute(instruction, (int*) vmem[1], ip);
 					else
 						return this->execute(instruction, (int*) vmem[1], (int*) vmem[1]);
 				}
@@ -707,6 +710,7 @@ int machine::getTicket(){
 				*ip += 2;
 				if(mem[1] && sp[1]){
 					return this->execute(instruction, vsp[1], (int *) vmem[1]);
+					*sp += 1;
 				}
 				else
 					return ERROR_SIGNAL;
@@ -716,6 +720,7 @@ int machine::getTicket(){
 				*ip += 1;
 				if(sp[0]){
 					return this->execute(RET, ip, (int *) vsp[0]);
+					*sp -= 1;
 				}
 				else
 					return ERROR_SIGNAL;
@@ -1524,6 +1529,161 @@ int machine::execute(unsigned char instruction, int *value1, int *value2){
 
 
 
+		}
+
+		break;
+
+
+
+
+		case SETC_REG:
+		case SETC_MEM:
+		case SETB_REG:
+		case SETB_MEM:
+		case SETNAE_REG:
+		case SETNAE_MEM:
+		{
+			value_1 = GETFLAG(*flags, CARRY_FLAG);
+		}
+
+		break;
+
+
+
+		case SETNC_REG:
+		case SETNC_MEM:
+		case SETNB_REG:
+		case SETNB_MEM:
+		case SETAE_REG:
+		case SETAE_MEM:
+		{
+			value_1 = (!GETFLAG(*flags, CARRY_FLAG)) & 0x01;
+		}
+
+		break;
+
+
+		case SETZ_REG:
+		case SETZ_MEM:
+		case SETE_REG:
+		case SETE_MEM:
+		{
+			value_1 = GETFLAG(*flags, ZERO_FLAG);
+		}
+
+		break;
+
+
+
+
+		case SETNZ_REG:
+		case SETNZ_MEM:
+		case SETNE_REG:
+		case SETNE_MEM:
+		{
+			value_1 = (!GETFLAG(*flags, ZERO_FLAG)) & 0x01;
+		}
+
+		break;
+
+
+
+		case SETS_REG:
+		case SETS_MEM:
+		{
+			value_1 = GETFLAG(*flags, SIGN_FLAG);
+		}
+
+		break;
+
+
+
+		case SETNS_REG:
+		case SETNS_MEM:
+		{
+			value_1 = (!GETFLAG(*flags, SIGN_FLAG)) & 0x01;
+		}
+
+		break;
+
+
+
+		case SETO_REG:
+		case SETO_MEM:
+		{
+			value_1 = GETFLAG(*flags, OVERFLOW_FLAG);
+		}
+
+		break;
+
+
+		case SETNO_REG:
+		case SETNO_MEM:
+		{
+			value_1 = (!GETFLAG(*flags, OVERFLOW_FLAG)) & 0x01;
+		}
+
+		break;
+
+
+
+		case SETP_REG:
+		case SETP_MEM:
+		case SETPE_REG:
+		case SETPE_MEM:
+		{
+			value_1 = GETFLAG(*flags, PARITY_FLAG);
+		}
+
+		break;
+
+
+		case SETNP_REG:
+		case SETNP_MEM:
+		case SETPO_REG:
+		case SETPO_MEM:
+		{
+			value_1 = (!GETFLAG(*flags, PARITY_FLAG)) & 0x01;
+		}
+
+		break;
+
+
+		case SETA_REG:
+		case SETA_MEM:
+		case SETNBE_REG:
+		case SETNBE_MEM:
+		{
+			if( (!GETFLAG(*flags, CARRY_FLAG))  &&  (!GETFLAG(*flags, ZERO_FLAG)) )
+				value_1 = 1;
+			else
+				value_1 = 0;
+		}
+
+		break;
+
+
+
+		case SETBE_REG:
+		case SETBE_MEM:
+		case SETNA_REG:
+		case SETNA_MEM:
+		{
+			if( (GETFLAG(*flags, CARRY_FLAG))  &&   (GETFLAG(*flags, ZERO_FLAG)) )
+				value_1 = 1;
+			else
+				value_1 = 0;
+		}
+
+		break;
+
+
+
+
+
+		case JUMP_REG:
+		{
+			*ip = value_1;
 		}
 
 		break;
