@@ -266,13 +266,15 @@ class machine{
 	// so here we have an amount of registers
 	// that can be represented in one byte
 	int registers[REGISTERS_AMOUNT];
+
 	
 	public:
 		int getTicket(int number);
 		int getTicket();
-		int execute(unsigned char instruction, int *value1, int *value2);
-		bool chkm(int address);
-		bool chkr(int address);
+		int execute(unsigned char instruction, char *value1, char *value2, 
+					bool isValue1Int = false, bool isValue2Int = false);
+		bool chkm(long int address);
+		bool chkr(long int address);
 		void printMemory();
 		void loadGene(char *memory, int length);
 		void loadGene(gene genome);		
@@ -280,7 +282,7 @@ class machine{
 		int memory_limit;
 		char *getMemory();
 		int *getRegisters();
-		void saveChanges(unsigned char instruction, int value_1, int value_2, int *value1, int* value2);
+		void saveChanges(unsigned char instruction, int value_1, int value_2, char *value1, char *value2);
 		
 		virtual int interrupt(int interrupt_code){
 			return 0;
@@ -353,13 +355,13 @@ int machine::getTicket(){
 	// Also, we need to know the flags
 	int *instruction_pointer = &this->registers[0];
 
-	cout << " INS:" << (int) *instruction_pointer << " ";
+	cout << " INS_P:" << (int) *instruction_pointer << " ";
 
 	int *stack_pointer = &this->registers[1];
-	int *ip = instruction_pointer;
+	char *ip = (char *) &(*(instruction_pointer));
 	// No need to declare the commented variable (unused variable)	
 	//int *stack_pointer = &this->registers[1];
-	int *flags = &this->registers[2];	
+	char *flags = (char *) &(this->registers[2]);	
 
 
 	
@@ -369,7 +371,7 @@ int machine::getTicket(){
 	// (it will ever be a valid number if it exists)
 	bool  sp[3], ins[7], reg[7], mem[7];
 	char *vins[7], *vmem[7];
-	int *vreg[7], *vsp[3];
+	char *vreg[7], *vsp[3];
 
 	
 	
@@ -393,7 +395,7 @@ int machine::getTicket(){
 			
 			// If the value IS a valid register, we store the register for later use
 			if(reg[i])
-				vreg[i] = &this->registers[(int) *vins[i]];
+				vreg[i] = (char *) &this->registers[(int) *vins[i]];
 			
 			// If the value is a valid memory, we store that memory for later use
 			if(mem[i])
@@ -414,7 +416,7 @@ int machine::getTicket(){
 		
 		// If it do exists, we store it's value
 		if(sp[i])
-			vsp[i] = (int*) &( this->memory[stack_position] );
+			vsp[i] = &( this->memory[stack_position] );
 	}
 
 	
@@ -433,7 +435,7 @@ int machine::getTicket(){
 
 		unsigned char instruction = (unsigned char) *vins[0];
 
-		
+		cout << " INS:" << (int) instruction << " ";
 		switch(instruction){
 		
 		
@@ -456,7 +458,7 @@ int machine::getTicket(){
 			case RCR_REG_REG:
 				*ip += 3;
 				if(reg[1] && reg[2]){
-					return this->execute(instruction, vreg[1], vreg[2]);
+					return this->execute(instruction, (char *) &( *(vreg[1])), (char *) &( *(vreg[2])), true, true);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -474,7 +476,7 @@ int machine::getTicket(){
 			case XOR_REG_MEM:
 				*ip += 3;
 				if(reg[1] && mem[2]){
-					return this->execute(instruction, vreg[1], (int*) vmem[2]);
+					return this->execute(instruction, (char *) &( *(vreg[1])), vmem[2], true);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -496,7 +498,7 @@ int machine::getTicket(){
 			case RCR_MEM_REG:
 				*ip += 3;
 				if(mem[1] && reg[2]){
-					return this->execute(instruction, (int*) vmem[1], vreg[2]);
+					return this->execute(instruction, vmem[1], (char *) &( *(vreg[2])), false, true);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -519,7 +521,7 @@ int machine::getTicket(){
 			case RCR_REG_VALUE:
 				*ip += 3;
 				if(reg[1] && ins[2]){
-					return this->execute(instruction, vreg[1], (int*) vins[2]);
+					return this->execute(instruction, (char *) &( *(vreg[1])), vins[2], true);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -540,7 +542,7 @@ int machine::getTicket(){
 			case RCR_MEM_VALUE:
 				*ip += 3;
 				if(mem[1] && ins[2]){
-					return this->execute(instruction, (int*) vmem[1], (int*) vins[2]);
+					return this->execute(instruction, vmem[1], vins[2]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -549,7 +551,7 @@ int machine::getTicket(){
 			case PUSH_REG:
 				*ip += 2;
 				if(sp[1] && reg[1]){
-					return this->execute(instruction, vsp[1], vreg[2]);
+					return this->execute(instruction, (char *) &( *(vsp[1])), (char *) &( *(vreg[2])), true, true);
 					*stack_pointer += 1;
 				}
 				else
@@ -559,7 +561,7 @@ int machine::getTicket(){
 			case PUSH_MEM:
 				*ip += 2;
 				if(sp[1] && mem[1]){
-					return this->execute(instruction, vsp[1], (int*) vmem[2]);
+					return this->execute(instruction, (char *) &( *(vsp[1])), vmem[2], true);
 					*stack_pointer += 1;
 				}
 				else
@@ -569,7 +571,7 @@ int machine::getTicket(){
 			case PUSH_VALUE:
 				*ip += 2;
 				if(sp[1] && ins[1]){
-					return this->execute(instruction, vsp[1], (int*) vins[1]);
+					return this->execute(instruction, (char *) &( *(vsp[1])), vins[1], true);
 					*stack_pointer += 1;
 				}
 				else
@@ -579,7 +581,7 @@ int machine::getTicket(){
 			case PUSH_FLAGS:
 				*ip += 2;
 				if(sp[1]){
-					return this->execute(instruction, vsp[1], flags);
+					return this->execute(instruction, (char *) &( *(vsp[1])), (char *) &( *(flags)), true, true);
 					*stack_pointer += 1;
 				}
 				else
@@ -589,7 +591,7 @@ int machine::getTicket(){
 			case POP_REG:
 				*ip += 2;
 				if(sp[0] && reg[1]){
-					return this->execute(instruction, vreg[1], vsp[0]);
+					return this->execute(instruction, (char *) &( *(vreg[1])), (char *) &( *(vsp[0])), true, true);
 					*stack_pointer -= 1;
 				}
 				else
@@ -599,7 +601,7 @@ int machine::getTicket(){
 			case POP_MEM:
 				*ip += 2;
 				if(sp[0] && mem[1]){
-					return this->execute(instruction, (int*) vmem[1], vsp[0]);
+					return this->execute(instruction, vmem[1], (char *) &( *(vsp[0])), false, true);
 					*stack_pointer -= 1;
 				}
 				else
@@ -609,7 +611,7 @@ int machine::getTicket(){
 			case POP_FLAGS:
 				*ip += 2;
 				if(sp[0]){
-					return this->execute(instruction, flags, vsp[0]);
+					return this->execute(instruction, (char *) &( *(flags)), (char *) &( *(vsp[0])), true, true);
 					*stack_pointer -= 1;
 				}
 				else
@@ -625,7 +627,7 @@ int machine::getTicket(){
 					int value2 = 1;
 					if(instruction == NEG_REG)
 						value2 = -1;
-					return this->execute(instruction, vreg[1], &value2);
+					return this->execute(instruction, (char *) &( *(vreg[1])), (char *) &( *(&value2)), true, true);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -640,7 +642,7 @@ int machine::getTicket(){
 					int value2 = 1;
 					if(instruction == NEG_MEM)
 						value2 = -1;
-					return this->execute(instruction, (int*) vmem[1], &value2);
+					return this->execute(instruction, vmem[1], (char *) &( *(&value2)), false, true);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -674,9 +676,9 @@ int machine::getTicket(){
 				*ip += 2;
 				if(reg[1]){
 					if( instruction == JUMP_REG )
-						return this->execute(instruction, vreg[1], ip);
+						return this->execute(instruction, (char *) &( *(vreg[1])), (char *) &( *(ip)), true, true);
 					else
-						return this->execute(instruction, vreg[1], vreg[1]);
+						return this->execute(instruction, (char *) &( *(vreg[1])), (char *) &( *(vreg[1])), true, true);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -685,7 +687,7 @@ int machine::getTicket(){
 			case CALL_REG:
 				*ip += 2;
 				if(reg[1] && sp[1]){
-					return this->execute(instruction, vsp[1], vreg[1]);
+					return this->execute(instruction, (char *) &( *(vsp[1])), (char *) &( *(vreg[1])), true, true);
 					*stack_pointer += 1;
 				}
 				else
@@ -720,9 +722,9 @@ int machine::getTicket(){
 				*ip += 2;
 				if(mem[1]){
 					if( instruction == JUMP_MEM )
-						return this->execute(instruction, (int*) vmem[1], ip);
+						return this->execute(instruction, vmem[1], (char *) &( *(ip)), false, true);
 					else
-						return this->execute(instruction, (int*) vmem[1], (int*) vmem[1]);
+						return this->execute(instruction, vmem[1], vmem[1]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -731,7 +733,7 @@ int machine::getTicket(){
 			case CALL_MEM:
 				*ip += 2;
 				if(mem[1] && sp[1]){
-					return this->execute(instruction, vsp[1], (int *) vmem[1]);
+					return this->execute(instruction, (char *) &( *(vsp[1])), vmem[1], true);
 					*stack_pointer += 1;
 				}
 				else
@@ -741,7 +743,7 @@ int machine::getTicket(){
 			case RET:
 				*ip += 1;
 				if(sp[0]){
-					return this->execute(RET, (int *) vsp[0], ip);
+					return this->execute(RET, (char *) &( *(vsp[0])), (char *) &( *(ip)), true, true);
 					*stack_pointer -= 1;
 				}
 				else
@@ -751,7 +753,7 @@ int machine::getTicket(){
 			case INT_VALUE:
 				*ip += 2;
 				if(ins[1]){
-					return this->execute(INT_VALUE, (int*) vins[1], (int*) vins[1]);
+					return this->execute(INT_VALUE, vins[1], vins[1]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -782,7 +784,7 @@ int machine::getTicket(){
 			case JNE_MEM:
 				ip += 2;
 				if(mem[1]){
-					return this->execute(instruction, (int *) vmem[1], ip);
+					return this->execute(instruction, vmem[1], (char *) &( *(ip)), false, true);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -814,7 +816,7 @@ int machine::getTicket(){
 			case JNE_VALUE:
 				ip += 2;
 				if(ins[1]){
-					return this->execute(instruction, (int *) vins[1], ip);
+					return this->execute(instruction, vins[1], (char *) &( *(ip)), false, true);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -834,12 +836,25 @@ int machine::getTicket(){
 }
 
 
-int machine::execute(unsigned char instruction, int *value1, int *value2){
+int machine::execute(unsigned char instruction, char *value1, char *value2,
+					 bool isValue1Int, bool isValue2Int){
+
 	int *flags = &this->registers[2];
 	int *ip = &this->registers[0];
 
-	int value_1 = (signed char) *((char *) value1);
-	int value_2 = (signed char) *((char *) value2);
+	int value_1;
+	int value_2;
+
+	if(isValue1Int)
+		value_1 = *((int *) value1);
+	else
+		value_1 = (int) *value1;
+
+	if(isValue2Int)
+		value_2 = *((int *) value2);
+	else
+		value_2 = (int) *value2;
+	
 
 	cout << "$[" << value_1 << "," << value_2 << "]";
 
@@ -1910,7 +1925,7 @@ int machine::execute(unsigned char instruction, int *value1, int *value2){
 }
 
 
-void machine::saveChanges(unsigned char instruction, int value_1, int value_2, int *value1, int* value2){
+void machine::saveChanges(unsigned char instruction, int value_1, int value_2, char *value1, char* value2){
 
 	cout << "¨(" << value_1 << "," << value_2 << ")";
 
@@ -2154,7 +2169,7 @@ void machine::saveChanges(unsigned char instruction, int value_1, int value_2, i
 
 // Checks if memory position _address_ exists
 // return true if it exists, else return false
-bool machine::chkm(int address){
+bool machine::chkm(long int address){
 	if( (address <= this->memory_limit) && (address >= 0) )
 		return true;
 	else
@@ -2164,7 +2179,7 @@ bool machine::chkm(int address){
 
 // Checks if register _address_ exists
 // if it do then return true, else return false
-bool machine::chkr(int address){
+bool machine::chkr(long int address){
 	if((address <= REGISTERS_RANGE) && (address >= 0))
 		return true;
 	else
