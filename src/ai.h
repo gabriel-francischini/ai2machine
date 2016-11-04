@@ -352,6 +352,9 @@ int machine::getTicket(){
 	// the currently instruction and the current stack position
 	// Also, we need to know the flags
 	int *instruction_pointer = &this->registers[0];
+
+	cout << " INS:" << (int) *instruction_pointer << " ";
+
 	int *stack_pointer = &this->registers[1];
 	int *ip = instruction_pointer;
 	// No need to declare the commented variable (unused variable)	
@@ -397,6 +400,8 @@ int machine::getTicket(){
 				vmem[i] = &this->memory[(int) *vins[i]];
 		}
 	}
+
+	cout << "!";
 	
 	// We need to analyze the current stack
 	for(int i=-1;i<2; i++){
@@ -413,7 +418,7 @@ int machine::getTicket(){
 	}
 
 	
-	
+	cout << "@";
 	
 	
 	// If the actual instruction doesn't exists, put the instruction position
@@ -424,9 +429,10 @@ int machine::getTicket(){
 	}
 	
 	else{
+		cout << "#";
+
 		unsigned char instruction = (unsigned char) *vins[0];
 
-		cout << " !" << (int) instruction << " ";
 		
 		switch(instruction){
 		
@@ -832,9 +838,10 @@ int machine::execute(unsigned char instruction, int *value1, int *value2){
 	int *flags = &this->registers[2];
 	int *ip = &this->registers[0];
 
-	int value_1 = (signed char) *value1, value_2 = (signed char) *value2;
+	int value_1 = (signed char) *((char *) value1);
+	int value_2 = (signed char) *((char *) value2);
 
-	cout << " :" << (int) instruction << " ";
+	cout << "$[" << value_1 << "," << value_2 << "]";
 
 	switch(instruction){
 
@@ -1904,6 +1911,8 @@ int machine::execute(unsigned char instruction, int *value1, int *value2){
 
 
 void machine::saveChanges(unsigned char instruction, int value_1, int value_2, int *value1, int* value2){
+
+	cout << "¨(" << value_1 << "," << value_2 << ")";
 
 	switch(instruction){
 
