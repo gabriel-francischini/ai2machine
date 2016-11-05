@@ -1453,7 +1453,7 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 
 			char value[3];
 			getHexFromChar((memory+i), &value[0]);
-			cout << value;
+			//cout << value;
 
 			char value_marker[5];
 
@@ -1463,11 +1463,19 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 				strcpy(value_marker, "[]");
 			if(arg_type[j] == VALUE_TYPE)
 				strcpy(value_marker, "  ");
+				
+				
+				cout << (char) value_marker[0];
+				cout << value << 'h';
+
+
 
 			if(j == (arg_num-1))
-				cout << "h ";
+				cout << " ";
 			else
-				cout << "h,";
+				cout << ",";
+				
+				cout << (char) value_marker[1];
 		}
 
 		cout << "\t";
