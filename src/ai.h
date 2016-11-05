@@ -355,7 +355,7 @@ int machine::getTicket(){
 	// Also, we need to know the flags
 	int *instruction_pointer = &this->registers[0];
 
-	cout << " INS_P:" << (int) *instruction_pointer << " ";
+	//cout << " INS_P:" << (int) *instruction_pointer << " ";
 
 	int *stack_pointer = &this->registers[1];
 	char *ip = (char *) &(*(instruction_pointer));
@@ -403,7 +403,7 @@ int machine::getTicket(){
 		}
 	}
 
-	cout << "!";
+	//cout << "!";
 	
 	// We need to analyze the current stack
 	for(int i=-1;i<2; i++){
@@ -420,7 +420,7 @@ int machine::getTicket(){
 	}
 
 	
-	cout << "@";
+	//cout << "@";
 	
 	
 	// If the actual instruction doesn't exists, put the instruction position
@@ -431,11 +431,11 @@ int machine::getTicket(){
 	}
 	
 	else{
-		cout << "#";
+		//cout << "#";
 
 		unsigned char instruction = (unsigned char) *vins[0];
 
-		cout << " INS:" << (int) instruction << " ";
+		//cout << " INS:" << (int) instruction << " ";
 		switch(instruction){
 		
 		
@@ -856,7 +856,7 @@ int machine::execute(unsigned char instruction, char *value1, char *value2,
 		value_2 = (int) *value2;
 	
 
-	cout << "$[" << value_1 << "," << value_2 << "]";
+	//cout << "$[" << value_1 << "," << value_2 << "]";
 
 	switch(instruction){
 
@@ -1927,7 +1927,7 @@ int machine::execute(unsigned char instruction, char *value1, char *value2,
 
 void machine::saveChanges(unsigned char instruction, int value_1, int value_2, char *value1, char* value2){
 
-	cout << "¨(" << value_1 << "," << value_2 << ")";
+	//cout << "¨(" << value_1 << "," << value_2 << ")";
 
 	switch(instruction){
 

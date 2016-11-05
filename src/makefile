@@ -23,4 +23,7 @@ test_getTicket.exe: test_getTicket.cpp ai.h
 test_random_text.exe: text_handler.h test_random_text.cpp
 	g++ -std=c++11 -Wall -g -o $@ test_random_text.cpp
 
+test_scan.exe: ai_scan.h ai.h test_scan.cpp
+	g++ -std=c++11 -Wall -g -o $@ test_scan.cpp
+
 .PHONY: all release debug
