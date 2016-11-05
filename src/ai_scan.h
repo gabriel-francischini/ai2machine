@@ -1447,7 +1447,7 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 		
 		}
 
-		cout << command << marker << " ";
+		cout << marker << " ";
 
 		int arg_num = getCommandArgsNumber((memory+i));
 		int arg_type[arg_num];
