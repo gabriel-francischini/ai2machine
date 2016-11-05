@@ -1465,17 +1465,17 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 				strcpy(value_marker, "  ");
 				
 				
-				cout << (char) value_marker[0];
-				cout << value << 'h';
+			cout << (char) value_marker[0];
+			cout << value << 'h';
+			cout << (char) value_marker[1];
 
 
 
 			if(j == (arg_num-1))
 				cout << " ";
 			else
-				cout << ",";
+				cout << ", ";
 				
-				cout << (char) value_marker[1];
 		}
 
 		cout << "\t";
