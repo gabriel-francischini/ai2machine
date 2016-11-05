@@ -4,6 +4,10 @@
 #include "ai.h"
 #include <string.h>
 
+#define VALUE_TYPE 2
+#define MEM_TYPE 1
+#define REG_TYPE 0
+
 
 void getCommandName(char *command, char *array){
 
@@ -1385,6 +1389,41 @@ void getHexFromChar(char *value, char *array){
 }
 
 
+void getArgsTypes(char *command, int *buffer){
+
+	int buff_index = 0;
+	for(int i=0; *(command+i) != '\0'; i++){
+
+		if(*(command+i) == '_'){
+
+			switch(*(command+i+1)){
+
+				case 'R':
+					*(buffer+buff_index) = REG_TYPE;
+				break;
+
+				case 'M':
+					*(buffer+buff_index) = MEM_TYPE;
+				break;
+
+				case 'V':
+					*(buffer+buff_index) = VALUE_TYPE;
+
+
+				default:
+				break;
+			}
+
+
+			buff_index++;
+
+		}
+
+	}
+
+
+}
+
 void printMemory(char *memory, int bytesToPrint, int markedByte){
 	
 	for(int i=0; i<bytesToPrint; i++){
@@ -1405,6 +1444,9 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 		cout << command << marker << " ";
 
 		int arg_num = getCommandArgsNumber((memory+i));
+		int arg_type[arg_num];
+
+		getArgsTypes(command, &arg_type[0]);
 
 		for(int j=0; j<arg_num; j++){
 			i++;
@@ -1412,6 +1454,15 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 			char value[3];
 			getHexFromChar((memory+i), &value[0]);
 			cout << value;
+
+			char value_marker[5];
+
+			if(arg_type[j] == REG_TYPE)
+				value_marker = "$$";
+			if(arg_type[j] == MEM_TYPE)
+				value_marker = "[]";
+			if(arg_type[j] == VALUE_TYPE)
+				value_marker = "  ";
 
 			if(j == (arg_num-1))
 				cout << "h ";
