@@ -1458,11 +1458,11 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 			char value_marker[5];
 
 			if(arg_type[j] == REG_TYPE)
-				value_marker = "$$";
+				strcpy(value_marker,"$$");
 			if(arg_type[j] == MEM_TYPE)
-				value_marker = "[]";
+				strcpy(value_marker, "[]");
 			if(arg_type[j] == VALUE_TYPE)
-				value_marker = "  ";
+				strcpy(value_marker, "  ");
 
 			if(j == (arg_num-1))
 				cout << "h ";
@@ -1479,4 +1479,4 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 
 }
 
-#endif 
+#endif
