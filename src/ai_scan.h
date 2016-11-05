@@ -1440,6 +1440,12 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 		cout << marker;
 
 		getCommandName((memory+i), command);
+		
+		for(int i=0; (*(command+i) != '_') || (*(command+i) != '\0'); i++){
+		
+		cout << (char) *(command+i);
+		
+		}
 
 		cout << command << marker << " ";
 
