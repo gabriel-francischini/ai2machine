@@ -1478,18 +1478,18 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 
 
 			if(j == (arg_num-1))
-				cout << " ";
+				cout << "";
 			else
 				cout << ", ";
 				
 		}
 
-		cout << "\t";
+		//cout << "\t";
 
 
 	}
 
-	cout << "\n";
+	//cout << "\n";
 
 }
 

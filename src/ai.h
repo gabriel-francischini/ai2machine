@@ -39,6 +39,7 @@ const int REGISTERS_RANGE = (REGISTERS_AMOUNT-1);
 
 // For function intercommunication
 #define ERROR_SIGNAL -1
+#define INTERRUPT_SIGNAL -2;
 
 // General opcodes
 #define MOV_REG_REG 0x0001
@@ -280,19 +281,21 @@ class machine{
 		void loadGene(gene genome);		
 		void clearMemory();		
 		int memory_limit;
+		int registers_limit;
 		char *getMemory();
 		int *getRegisters();
 		void saveChanges(unsigned char instruction, int value_1, int value_2, char *value1, char *value2);
 		
 		virtual int interrupt(int interrupt_code){
-			return 0;
+			return INTERRUPT_SIGNAL;
 		}
 
 		machine(){
 			this->memory_limit = (int) (MEM_SPACE-1);
+			this->registers_limit = (int) (REGISTERS_AMOUNT-1);
 
-			/*for(int i=0; i<REGISTERS_AMOUNT; i++)
-				registers[i] = 0;*/
+			for(int i=0; i<REGISTERS_AMOUNT; i++)
+				registers[i] = 0;
 
 		}
 		
@@ -2273,6 +2276,8 @@ void gene::reproduce(gene *father, gene *mother){
 		for(int i=0; i <= this->memory_limit;i++)
 			this->memory[i]=copy->memory[i];
 	}
+
+	this->checkMutations();
 }
 
 

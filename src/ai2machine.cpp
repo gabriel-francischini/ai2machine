@@ -9,6 +9,34 @@
 
 using namespace std;
 
+class literaryMachine: public machine {
+	public:
+		literaryMachine() : machine(){}
+
+		virtual int interrupt(int interrupt_code);
+
+};
+
+class examMachine: public machine {
+	public:
+		examMachine() : machine() {}
+		virtual int interrupt(int interrupt_code);
+
+};
+
+
+int literaryMachine::interrupt(int interrupt_code){
+
+	return INTERRUPT_SIGNAL;
+}
+
+int examMachine::interrupt(int interrupt_code){
+
+	return INTERRUPT_SIGNAL;
+}
+
+
+
 
 int main(){
 	srand(time(NULL));
@@ -20,7 +48,7 @@ int main(){
 	
 	// This one holds the AI's to be trained
 	// that will be capable of writing text
-	machine writers[100];
+	literaryMachine writers[100];
 
 	// This one hold the genes of the writing AIs
 	gene gene_writers[100];
@@ -32,10 +60,17 @@ int main(){
 	// to the detect if a text was written by a human, and if
 	// that happen we can make the machine writers[] hold
 	// AIs that passes the Turing Test
-	machine readers[100];
+	examMachine readers[100];
 
 	// Below are the readers[]'s genes
 	gene gene_readers[100];
+
+	for(int i=0; i<100; i++){
+
+		writers[i].loadGene(gene_writers[i]);
+		readers[i].loadGene(gene_readers[i]);
+
+	}
 	
 
 	return 0;
