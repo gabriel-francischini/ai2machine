@@ -8,7 +8,7 @@
 using namespace std;
 
 // Global variables
-#define MEM_SPACE 4096
+#define MEM_SPACE (4096*16)
 const int MEM_LEN = (MEM_SPACE - 1);
 #define GEN_SPACE 4096
 const int GEN_LEN = (GEN_SPACE-1);
@@ -17,8 +17,8 @@ const int REGISTERS_RANGE = (REGISTERS_AMOUNT-1);
 
 // This numbers are percentage, i.e.
 // a 5 would mean that 5 of 100 suffers that
-#define MUTATION_CHANCE 5
-#define CROSSOVER_RATE 20
+#define MUTATION_CHANCE 35
+#define CROSSOVER_RATE 100
 
 
 // Here we define which bits in FLAGS do what
@@ -260,7 +260,7 @@ class gene;
 // machine (a turing machine)
 class machine{
 	
-	protected:
+	public:
 	char memory[MEM_SPACE];
 	
 	// The size of a char is (in my machine) one byte,
@@ -286,7 +286,7 @@ class machine{
 		int *getRegisters();
 		void saveChanges(unsigned char instruction, int value_1, int value_2, char *value1, char *value2);
 		
-		virtual int interrupt(int interrupt_code){
+		virtual int interrupt(int interrupt_code, int parameter){
 			return INTERRUPT_SIGNAL;
 		}
 
@@ -356,7 +356,7 @@ int machine::getTicket(){
 	// For most operations, we'll need to know
 	// the currently instruction and the current stack position
 	// Also, we need to know the flags
-	int *instruction_pointer = &this->registers[0];
+	int *instruction_pointer = &(this->registers[0]);
 
 	//cout << " INS_P:" << (int) *instruction_pointer << " ";
 
@@ -364,7 +364,7 @@ int machine::getTicket(){
 	char *ip = (char *) &(*(instruction_pointer));
 	// No need to declare the commented variable (unused variable)	
 	//int *stack_pointer = &this->registers[1];
-	char *flags = (char *) &(this->registers[2]);	
+	char *flags = (char *) ((int *) &(this->registers[2]));	
 
 
 	
@@ -402,7 +402,7 @@ int machine::getTicket(){
 			
 			// If the value is a valid memory, we store that memory for later use
 			if(mem[i])
-				vmem[i] = &this->memory[(int) *vins[i]];
+				vmem[i] = (char *) &this->memory[((int) (*vins[i]))];
 		}
 	}
 
@@ -554,7 +554,7 @@ int machine::getTicket(){
 			case PUSH_REG:
 				*ip += 2;
 				if(sp[1] && reg[1]){
-					return this->execute(instruction, (char *) &( *(vsp[1])), (char *) &( *(vreg[2])), true, true);
+					return this->execute(instruction, (char *) &( *(vsp[1])), (char *) &( *(vreg[1])), true, true);
 					*stack_pointer += 1;
 				}
 				else
@@ -564,7 +564,7 @@ int machine::getTicket(){
 			case PUSH_MEM:
 				*ip += 2;
 				if(sp[1] && mem[1]){
-					return this->execute(instruction, (char *) &( *(vsp[1])), vmem[2], true);
+					return this->execute(instruction, (char *) &( *(vsp[1])), vmem[1], true);
 					*stack_pointer += 1;
 				}
 				else
@@ -584,7 +584,7 @@ int machine::getTicket(){
 			case PUSH_FLAGS:
 				*ip += 2;
 				if(sp[1]){
-					return this->execute(instruction, (char *) &( *(vsp[1])), (char *) &( *(flags)), true, true);
+					return this->execute(instruction, (char *) &( *(vsp[1])), (char *) ((int *) &(this->registers[2])), true, true);
 					*stack_pointer += 1;
 				}
 				else
@@ -614,7 +614,7 @@ int machine::getTicket(){
 			case POP_FLAGS:
 				*ip += 2;
 				if(sp[0]){
-					return this->execute(instruction, (char *) &( *(flags)), (char *) &( *(vsp[0])), true, true);
+					return this->execute(instruction, (char *) ((int *) &(this->registers[2])), (char *) &( *(vsp[0])), true, true);
 					*stack_pointer -= 1;
 				}
 				else
@@ -755,8 +755,8 @@ int machine::getTicket(){
 
 			case INT_VALUE:
 				*ip += 2;
-				if(ins[1]){
-					return this->execute(INT_VALUE, vins[1], vins[1]);
+				if(ins[1] && ins[2]){
+					return this->execute(INT_VALUE, vins[1], vins[2]);
 				}
 				else
 					return ERROR_SIGNAL;
@@ -849,12 +849,12 @@ int machine::execute(unsigned char instruction, char *value1, char *value2,
 	int value_2;
 
 	if(isValue1Int)
-		value_1 = *((int *) value1);
+		value_1 = (int) *((unsigned int *) value1);
 	else
 		value_1 = (int) *value1;
 
 	if(isValue2Int)
-		value_2 = *((int *) value2);
+		value_2 = (int) *((unsigned int *) value2);
 	else
 		value_2 = (int) *value2;
 	
@@ -1770,7 +1770,7 @@ int machine::execute(unsigned char instruction, char *value1, char *value2,
 
 		case INT_VALUE:
 		{
-			return this->interrupt(value_1);
+			return this->interrupt(value_1, value_2);
 		}
 
 		break;
@@ -2196,14 +2196,14 @@ void machine::loadGene(char *memory, int length){
 	// We must be careful to not write values
 	// beyond the last char of machine's memory
 	int limit = 0;
-	if((length-1) < this->memory_limit)
+	if((length) < this->memory_limit)
 		limit = length;
 	else
 		limit = this->memory_limit;
 	
 	// Knowing when to stop, we just copy it
-	for(int i=0; i <= limit; i++)
-		this->memory[i]=memory[i];
+	for(int i=0; i < limit; i++)
+		this->memory[i] = *(memory + i);
 }
 
 // This one should only be used
@@ -2247,7 +2247,7 @@ char* gene::getMemory(){
 }
 
 void gene::checkMutations(){
-	for(int i=0; i <= this->memory_limit; i++){
+	for(int i=0; i < this->memory_limit; i++){
 		if((dist100(mt)) <= MUTATION_CHANCE)
 			this->memory[i] = distchar(mt);
 	}
@@ -2255,14 +2255,18 @@ void gene::checkMutations(){
 
 
 void gene::reproduce(gene *father, gene *mother){
-	if((dist100(mt))< CROSSOVER_RATE){
-		uniform_int_distribution<int> distplace(0,this->memory_limit);
+	if((dist100(mt)) <= CROSSOVER_RATE){
+
+		uniform_int_distribution<int> distplace(0, GEN_SPACE-1);
+		
 		int crossover_place = distplace(mt);
+		
 		gene *copy=father;
-		for(int i=0;i <= this->memory_limit; i++){
+		
+		for(int i=0;i < this->memory_limit; i++){
 			if(i==crossover_place)
 				copy=mother;
-			this->memory[i]=copy->memory[i];
+			this->memory[i]=*(copy->getMemory()+i);
 		}
 		
 	}
@@ -2273,8 +2277,8 @@ void gene::reproduce(gene *father, gene *mother){
 		else
 			copy = mother;
 		
-		for(int i=0; i <= this->memory_limit;i++)
-			this->memory[i]=copy->memory[i];
+		for(int i=0; i < this->memory_limit;i++)
+			this->memory[i]= copy->memory[i];
 	}
 
 	this->checkMutations();

@@ -5,7 +5,7 @@ release: ai.h ai2machine.cpp
 	g++ -std=c++11 -Wall -o ai2machine ai2machine.cpp
 	g++ -std=c++11 -Wall -o a.exe ai2machine.cpp
 
-debug: ai2machine.exe test_file.exe test_loadGene.exe test_getTicket.exe test_random_text.exe
+debug: ai2machine.exe test_file.exe test_loadGene.exe test_getTicket.exe test_random_text.exe test_scan.exe
 
 ai2machine.exe: ai.h ai2machine.cpp
 	g++ -std=c++11 -Wall -g -o ai2machine.exe ai2machine.cpp
@@ -26,4 +26,13 @@ test_random_text.exe: text_handler.h test_random_text.cpp
 test_scan.exe: ai_scan.h ai.h test_scan.cpp
 	g++ -std=c++11 -Wall -g -o $@ test_scan.cpp
 
-.PHONY: all release debug
+clean:
+	rm test_file.exe
+	rm test_loadGene.exe
+	rm test_random_text.exe
+	rm test_scan.exe
+	rm ai2machine.exe
+	rm ai2machine
+	rm a.exe
+
+.PHONY: all release debug clean

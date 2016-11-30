@@ -4,20 +4,26 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include <random>
+
 using namespace std;
 
 long int file_size(char *filename);
 
+mt19937 txt(1493 + time(NULL));
 
 void random_text(const char *filename, char *buffer, long int buffer_size){
 
 	long int size_of_file = file_size( (char *) filename);
 
+	uniform_int_distribution<int> dist_file(0, size_of_file-1);
+
+
 	ifstream file(filename, ios::binary | ios::ate);
 
 	if( file.is_open() ){
 
-		file.seekg(rand()%size_of_file);
+		file.seekg(dist_file(txt));
 		file.read(buffer, buffer_size);
 
 		file.close();
