@@ -1,5 +1,5 @@
 #include <iostream>
-#include "ai.h"
+#include "../ai.h"
 
 int main(){
 

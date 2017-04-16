@@ -1,4 +1,4 @@
-#include "text_handler.h"
+#include "../text_handler.h"
 
 int main(){
 	srand(time(NULL));
