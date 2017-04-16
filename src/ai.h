@@ -8,17 +8,17 @@
 using namespace std;
 
 // Global variables
-#define MEM_SPACE (4096*16)
-const int MEM_LEN = (MEM_SPACE - 1);
-#define GEN_SPACE 4096
-const int GEN_LEN = (GEN_SPACE-1);
-#define REGISTERS_AMOUNT ((int) pow(2,(sizeof(char)*8)-1))
-const int REGISTERS_RANGE = (REGISTERS_AMOUNT-1);
+const int MEM_SPACE = 32; //(4096*16)
+#define MEM_LEN (MEM_SPACE - 1)
+const int GEN_SPACE = 32; //4096
+#define  GEN_LEN (GEN_SPACE-1)
+const int REGISTERS_AMOUNT = 10; //((int) pow(2,(sizeof(char)*8)-1))
+#define REGISTERS_RANGE (REGISTERS_AMOUNT-1)
 
 // This numbers are percentage, i.e.
 // a 5 would mean that 5 of 100 suffers that
-#define MUTATION_CHANCE 35
-#define CROSSOVER_RATE 100
+#define MUTATION_CHANCE 2
+#define CROSSOVER_RATE 80
 
 
 // Here we define which bits in FLAGS do what
