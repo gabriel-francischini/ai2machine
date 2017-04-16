@@ -13,13 +13,13 @@
 using namespace std;
 
 #define TEXT_BUFFER 1024
-#define MAX_TICKETS 100000
+#define MAX_TICKETS 1000
 
 unsigned int MAX_INT = ((int) pow(2,(sizeof(int)*8)-1));
 
 
-//mt19937 my_rand(1493 + time(NULL));
-default_random_engine my_rand(1493 + time(NULL));
+mt19937 my_rand(1493 + time(NULL));
+//default_random_engine my_rand(1493 + time(NULL));
 
 // This one is a shared buffer for
 // ai calling
@@ -32,7 +32,7 @@ uniform_int_distribution<int> dist_ticket((MAX_TICKETS/10), MAX_TICKETS);
 
 // Distribution to randomly selects a machine
 uniform_int_distribution<int> dist_machine(0,99);
-uniform_int_distribution<unsigned long int> dist_the_better_half(0, 49);
+uniform_int_distribution<unsigned long int> dist_the_better_half(0, 89);
 uniform_int_distribution<unsigned long int> dist_ulong_int(0, pow(2,(sizeof(unsigned long int)*8)-1));
 
 
@@ -278,9 +278,48 @@ int main(){
 		cout << "\n";*/
 
 
-		for(int examples=0; examples < 2000; examples++){
+		for(int examples=0; examples < 1; examples++){
+			for(int i=0;i<100;i++){
 
-			if(!(examples%200))
+				long int tickets = dist_ticket(my_rand);
+
+				unsigned int evaluated_score = 0;
+
+				getTextOnBuffer();
+				/*cout << "\nThe first letter is: ";
+				cout.write(&text_buffer[0], 1);
+				cout << "\n";*/
+
+				// Now we use all the tickets!
+				for(int used_tickets=0; used_tickets < tickets; used_tickets++){					
+					readers[i].getTicket();
+
+					if(((text_buffer[0] >= 'a') || (text_buffer[1] <= 'z')) && (readers[i].registers[5] == 0x0A)){
+						evaluated_score += 100;
+						readers[i].registers[5] = 0;
+					}
+					if(((text_buffer[0] >= 'A') || (text_buffer[1] <= 'Z')) && (readers[i].registers[5] == 0x0B)){
+						evaluated_score += 100;
+						readers[i].registers[5] = 0;
+					}
+					last_interrupt_code = 0;
+				}
+
+				
+				last_interrupt_code = 0;
+
+				if(evaluated_score == 0)
+					readers_score[i] += 1;
+				else
+					readers_score[i] +=  evaluated_score;
+
+				if(readers_score[i] == 0)
+					readers_score[i] = 1;
+
+			}
+
+
+			/*if(!(examples%200))
 				cout << ".";
 
 			// We randomly decides if the text to be examinated will
@@ -291,6 +330,11 @@ int main(){
 
 				// We choose a random machine
 				int literary_number = dist_machine(my_rand);
+				
+				do{
+					literary_number = dist_machine(my_rand);
+				}while( (literary_number < 0) || (literary_number > 99) );
+				
 				literaryMachine *random_literary = &writers[literary_number];
 
 				// How much tickets (clocks) this machine has to waste
@@ -311,19 +355,19 @@ int main(){
 
 				exam_number = temp;
 
-				while((exam_number < 0) || (exam_number > 99)){
+				do{
 					exam_number = dist_machine(my_rand);
-				}
+				}while((exam_number < 0) || (exam_number > 99));
 
 				//cout << "\n\n exam_number: " << exam_number;
 
 				examMachine *random_examinator = &readers[exam_number];
 
-				ptemp = ((int *) ((char *) (&random_examinator)));
-				temp = (int) *((char *)(&random_examinator));
-				ptemp = ((int*) ((char *) (&readers[exam_number])));
+				ptemp = (( int *) ((unsigned char *) (&random_examinator)));
+				temp = (int) *((unsigned char *)(&random_examinator));
+				ptemp = (( int*) ((unsigned char *) (&readers[exam_number])));
 				temp =  (readers[exam_number].registers[0]);
-				ptemp = (int *) (char *) &readers[0];
+				ptemp = ( int *) (unsigned char *) &readers[0];
 
 				// Get another round of tickets
 				temp = dist_ticket(my_rand);
@@ -336,7 +380,7 @@ int main(){
 				}
 
 				// And now we assign each one his score
-				unsigned int evaluated_score; 
+				unsigned int evaluated_score = *((readers[exam_number].getRegisters())+5); 
 
 				
 
@@ -345,7 +389,13 @@ int main(){
 
 				// And the score of the exam one is the value of how much
 				// right he was to say that this one is another AI
-				readers_score[exam_number] += MAX_INT - evaluated_score;
+				//readers_score[exam_number] += MAX_INT - evaluated_score;
+				if(evaluated_score <= 42 )
+					readers_score[exam_number] += 42 - evaluated_score;
+				else
+					readers_score[exam_number] +=  evaluated_score - 42;
+
+
 
 				if(readers_score[exam_number] == 0)
 					readers_score[exam_number] = 1;
@@ -361,22 +411,32 @@ int main(){
 
 				// We randomly choose a examiner
 				int exam_number = dist_machine(my_rand);
-				examMachine *random_examinator = &readers[exam_number];
+				
+				do{
+					exam_number = dist_machine(my_rand);
+				}while((exam_number < 0) || (exam_number > 99));
 
 				// Get a round of tickets
 				long int tickets = dist_ticket(my_rand);
 
 				// Now we BURN those tickets!
 				for(int used_tickets=0; used_tickets < tickets; used_tickets++){
-					random_examinator->getTicket();
+					readers[exam_number].getTicket();
 				}
 
 				// And now we assign each one his score
-				unsigned int evaluated_score = *((random_examinator->getRegisters())+5);
+				unsigned int evaluated_score = *((readers[exam_number].getRegisters())+5);
 
 				// And the score of the machine is how much it was right
 				// saying if this a real text (0) or fake text (65355)
-				readers_score[exam_number] += evaluated_score;
+				//readers_score[exam_number] += evaluated_score;
+
+				if(evaluated_score <= 42 )
+					readers_score[exam_number] += 42 - evaluated_score;
+				else
+					readers_score[exam_number] +=  evaluated_score - 42;
+
+
 
 				if(readers_score[exam_number] == 0)
 					readers_score[exam_number] = 1; 
@@ -384,7 +444,7 @@ int main(){
 				// Now we reset the buffer for reuse
 				buffer_length = 0;
 				buffer_pointer = 0;
-			}
+			}*/
 
 		}
 
@@ -455,17 +515,14 @@ int main(){
 
 
 		// If it's the time, we print the better one so far
-		if(!(generation%1)){
+		if(!(generation%50)){
 
 			literaryMachine *theBest = &writers[writers_arranged[0]];
 
 			for(int used_tickets=0; used_tickets < MAX_TICKETS; used_tickets++)
 				theBest->getTicket();
 
-			cout << "\n Score of the best reader: " << readers_score_arranged[0];
-			cout << "\n Score of the best writer so far: " << writers_score_arranged[0];
-			cout << "\n Score of the worst reader: " << readers_score_arranged[99];
-			cout << "\n Score of the worst writer so far: " << writers_score_arranged[99];
+			
 			cout << "\n The best one so far:\n\n";
 			cout.write(&text_buffer[0], buffer_length);
 			cout << "\n\n Compare with:\n\n";
@@ -478,6 +535,27 @@ int main(){
 			buffer_pointer = 0;
 
 		}
+		cout << "\nBest reader registers: ";
+		for(int i=0;i<readers[readers_arranged[99]].registers_limit;i++)
+			cout << readers[readers_arranged[99]].registers[i] << "\t ";
+		cout << "\nIts memory: ";
+		char value[3];
+		for(int i=0;i<readers[readers_arranged[99]].memory_limit;i++){
+			getHexFromChar(&readers[readers_arranged[99]].memory[i], &value[0]);
+			cout << value << " ";
+		}
+
+		cout << "\n Its recipe: {\n\t";
+		printMemory(&readers[readers_arranged[99]].memory[0], readers[readers_arranged[99]].memory_limit, -1);
+		cout << "\n}\n";
+
+
+
+
+		cout << "\n Score of the best reader: " << readers_score_arranged[99];
+		cout << "\n Score of the best writer so far: " << writers_score_arranged[0];
+		cout << "\n Score of the worst reader: " << readers_score_arranged[0];
+		cout << "\n Score of the worst writer so far: " << writers_score_arranged[99];
 
 
 
@@ -490,7 +568,7 @@ int main(){
 
 		for(int i=0; i < 100; i++){
 			writers_sum += writers_score_arranged[i];
-			readers_sum += readers_score_arranged[i];
+			readers_sum += readers_score_arranged[i]*readers_score_arranged[i];
 
 			reference_writers_score[i] = writers_sum;
 			reference_readers_score[i] = readers_sum;
@@ -501,29 +579,37 @@ int main(){
 		cout << "\nThe median score for writers is: " << (writers_sum/100);
 		cout << "\nThe median score for readers is: " << (readers_sum/100);
 
+		cout << "\n";
 
+		cout << "The score list: {";
+		for(int i=0;i<15;i++){
+			cout << " " << readers_arranged[i] << ": " << readers_score_arranged[i] << ",";
+		} 
+		cout << "}\n";
 
 		// Finally, we can select the better ones and
-		// discard away the not-so-good ones
+		// multiply them
 		uniform_int_distribution<unsigned long int> dist_writers(0, writers_sum);
-		uniform_int_distribution<unsigned long int> dist_readers(0, readers_sum);
+		uniform_int_distribution<unsigned long int> dist_readers(reference_readers_score[98], readers_sum);
 		//uniform_int_distribution<unsigned long int> dist_the_better_half(0, 50);
 
-		// We will kill 30 of both writers and readers
-		for(int deaths=0; deaths < 20; deaths++){
+		// We generate 5 sons of this generation
+		for(int number_of_sons=0; number_of_sons < 20; number_of_sons++){
 
 			// This we will use to scan through scores
 			unsigned long int last_writer_value = 0;
-			unsigned long int last_reader_value = 0;
+			unsigned long int last_reader_value_father = 0;
+			unsigned long int last_reader_value_mother = 0;
 
 			// This one helds the score desired, but
 			// after for they'll held the number of the
 			// machine desired
 			unsigned long int writers_unlucky_one = dist_writers(my_rand);
-			unsigned long int readers_unlucky_one = dist_readers(my_rand);
+			unsigned long int readers_lucky_one_father = dist_readers(my_rand);
+			unsigned long int readers_lucky_one_mother = dist_readers(my_rand);
 
 			// We use these switches to know when to stop
-			bool writers_done = false, readers_done = false;
+			bool father_done = false, mother_done = false;
 
 			/*for(int i=0; i < 100; i++){
 				used_readers[i] = false;
@@ -537,36 +623,37 @@ int main(){
 				//cout << "\t " << reference_writers_score[i];
 
 				// If we have not found a unlucky writer yet
-				if(!writers_done){
+				if(!father_done){
 
 					//if(used_writers[i]){
 
 					//}
 
 					if(i == 100){
-						writers_unlucky_one = dist_machine(my_rand);
+						readers_lucky_one_father = dist_machine(my_rand);
 					}
 					else{
 
-						// We see if it was the unlucky one to be randomised to death
+						// We see if it was the lucky one to be randomised to be a father
 						// (i.e. its score is the nearest one to the randomised score)
-						if((last_writer_value <= writers_unlucky_one) && (writers_unlucky_one <= reference_writers_score[i])){
+						if((last_reader_value_father <= readers_lucky_one_father) && (readers_lucky_one_father <= reference_readers_score[i])){
 						
 							// If it was, we mark it
-							writers_unlucky_one = writers_arranged[i];
+							readers_lucky_one_father = readers_arranged[i];
 						
+							// "Normalize" it's score
 							if(i != 0)
-								reference_writers_score[i] = reference_writers_score[i-1];
+								reference_readers_score[i] = reference_readers_score[i-1];
 							else
-								reference_writers_score[i] = 0;
+								reference_readers_score[i] = 0;
 
-							writers_done = true;
+							father_done = true;
 						}
 
 						else {
 
 							// Otherwise, we keep looking
-							last_writer_value = reference_writers_score[i];
+							last_reader_value_father = reference_readers_score[i];
 						}
 					}
 					
@@ -574,16 +661,16 @@ int main(){
 
 				// Same as above
 				// See if we have already found a unlucky reader
-				if(!readers_done){
+				if(!mother_done){
 
 					if(i == 100){
-						readers_unlucky_one = dist_machine(my_rand);
+						readers_lucky_one_mother = dist_machine(my_rand);
 					}
 					else{
 
 						// Test to see if it is the chosen one
-						if( (last_reader_value <= readers_unlucky_one) && (readers_unlucky_one <= reference_readers_score[i]) ){
-							readers_unlucky_one = readers_arranged[i];
+						if( (last_reader_value_mother <= readers_lucky_one_mother) && (readers_lucky_one_mother <= reference_readers_score[i]) ){
+							readers_lucky_one_mother = readers_arranged[i];
 
 							if(i != 0)
 								reference_readers_score[i] = reference_readers_score[i-1];
@@ -591,22 +678,28 @@ int main(){
 								reference_readers_score[i] = 0;
 
 
-							readers_done = true;
+							mother_done = true;
 						}
 						else {
 
 							// Otherwise, prepare to keep searching
-							last_reader_value = reference_readers_score[i];
+							last_reader_value_mother = reference_readers_score[i];
 						}
 					}
 					
 				}
 
 				// If both values were found, we don't need to search the remainig ones
-				if(readers_done && writers_done)
+				if(father_done && mother_done)
 					break;
 
 			}
+
+			//readers_lucky_one_mother = readers_arranged[readers_lucky_one_mother];
+			//readers_lucky_one_father = readers_arranged[readers_lucky_one_father];
+
+			// Whatever, boilerplate code
+			writers_unlucky_one = readers_lucky_one_father;
 
 			// We also need to choose parents for the unlucky ones' substitutes
 			int writer_father = writers_arranged[dist_the_better_half(my_rand)],
@@ -614,10 +707,69 @@ int main(){
 				reader_father = readers_arranged[dist_the_better_half(my_rand)],
 				reader_mother = readers_arranged[dist_the_better_half(my_rand)];
 
+			reader_father = readers_lucky_one_father;
+			reader_mother = readers_lucky_one_mother;
+
+			unsigned long int readers_unlucky_one = readers_arranged[dist_the_better_half(my_rand)];
+
+			//cout << "\tk(w, " << writers_unlucky_one << ")";
+
 			// Now we wipe out the unlucky one's DNA from the gene pool,
 			// And substitute them for new born machines
 			gene_writers[writers_unlucky_one].reproduce(&gene_writers[writer_mother], &gene_writers[writer_father]);
 			gene_readers[readers_unlucky_one].reproduce(&gene_readers[reader_father], &gene_readers[reader_mother]);
+
+
+			char hex[3];
+			/*cout << "\tg(w, " << writers_unlucky_one << ", m" << writer_mother << ", f" << writer_father << "):";
+			
+			cout << " m={";
+			for(int i=0; i<gene_writers[writer_mother].memory_limit;i++){
+				getHexFromChar(&gene_writers[writer_mother].memory[i], &hex[0]);
+				cout << " " << hex << ",";
+			}
+			cout << "}   ";
+
+			cout << " f={";
+			for(int i=0; i<gene_writers[writer_father].memory_limit;i++){
+				getHexFromChar(&gene_writers[writer_father].memory[i], &hex[0]);
+				cout << " " << hex << ",";
+			}
+			cout << "}   ";
+
+			cout << " g={";
+			for(int i=0; i<gene_writers[writers_unlucky_one].memory_limit;i++){
+				getHexFromChar(&gene_writers[writers_unlucky_one].memory[i], &hex[0]);
+				cout << " " << hex << ",";
+			}
+			cout << "}   \n";*/
+
+			/*cout << "\tk(r, " << readers_unlucky_one << ")   ";
+
+			cout << "\tg(r, " << readers_unlucky_one << ", f" << reader_father << ", m" << reader_mother << ")\t"; 
+
+			//cout << "\tg(w, " << writers_unlucky_one << ", m" << writer_mother << ", f" << writer_father << "):";
+			
+			cout << " m={";
+			for(int i=0; i<gene_readers[reader_mother].memory_limit;i++){
+				getHexFromChar(&gene_readers[reader_mother].memory[i], &hex[0]);
+				cout << " " << hex << ",";
+			}
+			cout << "}   ";
+
+			cout << " f={";
+			for(int i=0; i<gene_readers[reader_father].memory_limit;i++){
+				getHexFromChar(&gene_readers[reader_father].memory[i], &hex[0]);
+				cout << " " << hex << ",";
+			}
+			cout << "}   ";
+
+			cout << " g={";
+			for(int i=0; i<gene_readers[readers_unlucky_one].memory_limit;i++){
+				getHexFromChar(&gene_readers[readers_unlucky_one].memory[i], &hex[0]);
+				cout << " " << hex << ",";
+			}
+			cout << "}   \n";*/
 			
 			// Now we put those machines on the play
 			writers[writers_unlucky_one].clearMemory();
@@ -632,6 +784,17 @@ int main(){
 			for(int i=0; i < 100; i++){
 				readers_score[i] = 0;
 				writers_score[i] = 0;
+
+				for(int j=0; j < readers[i].registers_limit; j++){
+					readers[i].registers[j] = 0;
+				}
+			}
+
+			for(int i=0; i<100; i++){
+				for(int j=0; j < readers[i].registers_limit; j++)
+					readers[i].registers[j] = distchar(my_rand);
+				for(int j=0; j < 3; j++)
+					readers[i].registers[j] = 0;
 			}
 
 		}
