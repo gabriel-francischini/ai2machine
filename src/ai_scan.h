@@ -1473,7 +1473,8 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 				
 			cout << (char) value_marker[0];
 			cout << value << 'h';
-			cout << (char) value_marker[1];
+			if(value_marker[1] != ' ')
+				cout << (char) value_marker[1];
 
 
 
@@ -1484,12 +1485,12 @@ void printMemory(char *memory, int bytesToPrint, int markedByte){
 				
 		}
 
-		//cout << "\t";
+		cout << ";\n\t";
 
 
 	}
 
-	//cout << "\n";
+	cout << "\n";
 
 }
 
