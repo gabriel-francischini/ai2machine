@@ -26,6 +26,9 @@ test_random_text.exe: text_handler.h test_random_text.cpp
 test_scan.exe: ai_scan.h ai.h test_scan.cpp
 	g++ -std=c++11 -Wall -g -o $@ test_scan.cpp
 
+test_memory_dec.exe: ai_scan.h ai.h test_memory_dec.cpp
+	g++ -std=c++11 -Wall -g -o $@ test_memory_dec.cpp	
+
 clean:
 	rm test_file.exe
 	rm test_loadGene.exe
