@@ -2210,8 +2210,10 @@ void machine::loadGene(char *memory, int length){
 // when a machine dies
 void machine::clearMemory(){
 	for(int i=0; i <= this->memory_limit;i++)
-		this->memory[i]=0;
+		this->memory[i]= 0;//distchar(mt);
 	for(int i=0; i < REGISTERS_AMOUNT; i++)
+		registers[i] = 0;//distchar(mt);
+	for(int i=0; i < 3; i++)
 		registers[i] = 0;
 }
 
