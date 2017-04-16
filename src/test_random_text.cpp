@@ -15,16 +15,19 @@ int main(){
 
 	cout << "\n\n Testing again ";
 
-	for(int i=0; i<100000000; i++){
+	/*for(int i=0; i<100000000; i++){
 		if((i%10000000) == 0)
 			cout << ".";
-	}
+	}*/
 	cout << "\n\n";
 
-	random_text(&filename[0], &text[0], 300);
+	for(int i=0; i<10; i++){
+		random_text(&filename[0], &text[0], 300);
 
-	cout.write(&text[0], 300);
+		cout.write(&text[0], 300);
 
+		cout << "\n-------------------------------\n";
+	}
 	cout << "\n\n Test done.\n\n";
 
 }
