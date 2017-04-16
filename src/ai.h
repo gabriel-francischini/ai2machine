@@ -428,7 +428,7 @@ int machine::getTicket(){
 	
 	// If the actual instruction doesn't exists, put the instruction position
 	// to somewhere valid
-	if(ins[0] == false){
+	if((ins[0] == false) || ( ((*ip) +3 ) > this->memory_limit) ){
 		*ip = 0;
 		return ERROR_SIGNAL;
 	}
