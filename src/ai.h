@@ -2173,7 +2173,7 @@ void machine::saveChanges(unsigned char instruction, int value_1, int value_2, c
 // Checks if memory position _address_ exists
 // return true if it exists, else return false
 bool machine::chkm(long int address){
-	if( (address <= this->memory_limit) && (address >= 0) )
+	if( (address < this->memory_limit) && (address >= 0) )
 		return true;
 	else
 		return false;
@@ -2183,7 +2183,7 @@ bool machine::chkm(long int address){
 // Checks if register _address_ exists
 // if it do then return true, else return false
 bool machine::chkr(long int address){
-	if((address <= REGISTERS_RANGE) && (address >= 0))
+	if((address < this->registers_limit) && (address >= 0))
 		return true;
 	else
 		return false;
