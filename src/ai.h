@@ -259,17 +259,14 @@ class gene;
 // implements a processor-like
 // machine (a turing machine)
 class machine{
-	
-	public:
-	char memory[MEM_SPACE];
-	
-	// The size of a char is (in my machine) one byte,
-	// so here we have an amount of registers
-	// that can be represented in one byte
-	int registers[REGISTERS_AMOUNT];
+	private:
+		int _memory_limit;
+		int _registers_limit;
+		
 
-	
 	public:
+		char *memory;
+		int *registers;
 		int getTicket(int number);
 		int getTicket();
 		int execute(unsigned char instruction, char *value1, char *value2, 
@@ -280,25 +277,30 @@ class machine{
 		void loadGene(char *memory, int length);
 		void loadGene(gene genome);		
 		void clearMemory();		
-		int memory_limit;
-		int registers_limit;
 		char *getMemory();
+		int memory_limit() {return this->_memory_limit;}
 		int *getRegisters();
+		int registers_limit() {return this->_registers_limit;}
 		void saveChanges(unsigned char instruction, int value_1, int value_2, char *value1, char *value2);
-		
+
 		virtual int interrupt(int interrupt_code, int parameter){
 			return INTERRUPT_SIGNAL;
 		}
 
-		machine(){
-			this->memory_limit = (int) (MEM_SPACE-1);
-			this->registers_limit = (int) (REGISTERS_AMOUNT-1);
+		machine() {machine(MEM_SPACE, REGISTERS_AMOUNT);}
 
-			for(int i=0; i<REGISTERS_AMOUNT; i++)
-				registers[i] = 0;
-
+		machine(int memory_space, int registers_amount){
+			this->_memory_limit = memory_space-1;
+			this->_registers_limit = registers_amount-1;
+			this->memory = new char[memory_space];
+			this->registers = new int[registers_amount];
+			this->clearMemory();
 		}
 		
+		~machine(){
+			delete[] this->memory;
+			delete[] this->registers;
+		}
 };
 
 
@@ -323,7 +325,7 @@ int *machine::getRegisters(){
 void machine::printMemory(){
 	
 	// First we print the registers
-	for(int i=0; i<=this->memory_limit; i++)
+	for(int i=0; i<=this->_memory_limit; i++)
 		cout << this->registers[i];
 	
 	// then we print the real memory
@@ -412,7 +414,7 @@ int machine::getTicket(){
 	for(int i=-1;i<2; i++){
 		
 		// (the stack grows from the last memory position to the first)	
-		int stack_position = (int) (this->memory_limit) - ( (*stack_pointer) + i );	
+		int stack_position = (int) (this->_memory_limit) - ( (*stack_pointer) + i );	
 		
 		// We discover if current, last or next stack position exists or not
 		sp[i] = this->chkm(stack_position);
@@ -428,7 +430,7 @@ int machine::getTicket(){
 	
 	// If the actual instruction doesn't exists, put the instruction position
 	// to somewhere valid
-	if((ins[0] == false) || ( ((*ip) +3 ) > this->memory_limit) ){
+	if((ins[0] == false) || ( ((*ip) +3 ) > this->_memory_limit) ){
 		*ip = 0;
 		return ERROR_SIGNAL;
 	}
@@ -2173,7 +2175,7 @@ void machine::saveChanges(unsigned char instruction, int value_1, int value_2, c
 // Checks if memory position _address_ exists
 // return true if it exists, else return false
 bool machine::chkm(long int address){
-	if( (address < this->memory_limit) && (address >= 0) )
+	if( (address < this->_memory_limit) && (address >= 0) )
 		return true;
 	else
 		return false;
@@ -2183,7 +2185,7 @@ bool machine::chkm(long int address){
 // Checks if register _address_ exists
 // if it do then return true, else return false
 bool machine::chkr(long int address){
-	if((address < this->registers_limit) && (address >= 0))
+	if((address < this->_registers_limit) && (address >= 0))
 		return true;
 	else
 		return false;
@@ -2196,10 +2198,10 @@ void machine::loadGene(char *memory, int length){
 	// We must be careful to not write values
 	// beyond the last char of machine's memory
 	int limit = 0;
-	if((length) < this->memory_limit)
+	if((length) < this->_memory_limit)
 		limit = length;
 	else
-		limit = this->memory_limit;
+		limit = this->_memory_limit;
 	
 	// Knowing when to stop, we just copy it
 	for(int i=0; i < limit; i++)
@@ -2209,7 +2211,7 @@ void machine::loadGene(char *memory, int length){
 // This one should only be used
 // when a machine dies
 void machine::clearMemory(){
-	for(int i=0; i <= this->memory_limit;i++)
+	for(int i=0; i <= this->_memory_limit;i++)
 		this->memory[i]= 0;//distchar(mt);
 	for(int i=0; i < REGISTERS_AMOUNT; i++)
 		registers[i] = 0;//distchar(mt);

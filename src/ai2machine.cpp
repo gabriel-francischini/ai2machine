@@ -536,17 +536,17 @@ int main(){
 
 		}
 		cout << "\nBest reader registers: ";
-		for(int i=0;i<readers[readers_arranged[99]].registers_limit;i++)
+		for(int i=0;i<readers[readers_arranged[99]].registers_limit();i++)
 			cout << readers[readers_arranged[99]].registers[i] << "\t ";
 		cout << "\nIts memory: ";
 		char value[3];
-		for(int i=0;i<readers[readers_arranged[99]].memory_limit;i++){
+		for(int i=0;i<readers[readers_arranged[99]].memory_limit();i++){
 			getHexFromChar(&readers[readers_arranged[99]].memory[i], &value[0]);
 			cout << value << " ";
 		}
 
 		cout << "\n Its recipe: {\n\t";
-		printMemory(&readers[readers_arranged[99]].memory[0], readers[readers_arranged[99]].memory_limit, -1);
+		printMemory(&readers[readers_arranged[99]].memory[0], readers[readers_arranged[99]].memory_limit(), -1);
 		cout << "\n}\n";
 
 
@@ -785,13 +785,13 @@ int main(){
 				readers_score[i] = 0;
 				writers_score[i] = 0;
 
-				for(int j=0; j < readers[i].registers_limit; j++){
+				for(int j=0; j < readers[i].registers_limit(); j++){
 					readers[i].registers[j] = 0;
 				}
 			}
 
 			for(int i=0; i<100; i++){
-				for(int j=0; j < readers[i].registers_limit; j++)
+				for(int j=0; j < readers[i].registers_limit(); j++)
 					readers[i].registers[j] = distchar(my_rand);
 				for(int j=0; j < 3; j++)
 					readers[i].registers[j] = 0;
