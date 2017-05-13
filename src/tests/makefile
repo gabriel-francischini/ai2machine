@@ -1,4 +1,4 @@
-tests: test_file.exe test_loadGene.exe test_getTicket.exe test_random_text.exe test_scan.exe
+tests: test_file.exe test_loadGene.exe test_getTicket.exe test_random_text.exe test_scan.exe test_memory_dec.exe
 
 test_file.exe: test_file.cpp
 	g++ -std=c++11 -Wall -g -o test_file.exe test_file.cpp
