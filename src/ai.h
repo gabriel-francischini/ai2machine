@@ -552,7 +552,7 @@ int machine::getTicket(){
 			break;
 
 			case PUSH_REG:
-				*ip += 2;
+				*ip += 3;
 				if(sp[1] && reg[1]){
 					return this->execute(instruction, (char *) &( *(vsp[1])), (char *) &( *(vreg[1])), true, true);
 					*stack_pointer += 1;
@@ -562,7 +562,7 @@ int machine::getTicket(){
 			break;
 
 			case PUSH_MEM:
-				*ip += 2;
+				*ip += 3;
 				if(sp[1] && mem[1]){
 					return this->execute(instruction, (char *) &( *(vsp[1])), vmem[1], true);
 					*stack_pointer += 1;
@@ -572,7 +572,7 @@ int machine::getTicket(){
 			break;
 
 			case PUSH_VALUE:
-				*ip += 2;
+				*ip += 3;
 				if(sp[1] && ins[1]){
 					return this->execute(instruction, (char *) &( *(vsp[1])), vins[1], true);
 					*stack_pointer += 1;
@@ -582,7 +582,7 @@ int machine::getTicket(){
 			break;
 
 			case PUSH_FLAGS:
-				*ip += 2;
+				*ip += 3;
 				if(sp[1]){
 					return this->execute(instruction, (char *) &( *(vsp[1])), (char *) ((int *) &(this->registers[2])), true, true);
 					*stack_pointer += 1;
@@ -592,7 +592,7 @@ int machine::getTicket(){
 			break;
 
 			case POP_REG:
-				*ip += 2;
+				*ip += 3;
 				if(sp[0] && reg[1]){
 					return this->execute(instruction, (char *) &( *(vreg[1])), (char *) &( *(vsp[0])), true, true);
 					*stack_pointer -= 1;
@@ -602,7 +602,7 @@ int machine::getTicket(){
 			break;
 
 			case POP_MEM:
-				*ip += 2;
+				*ip += 3;
 				if(sp[0] && mem[1]){
 					return this->execute(instruction, vmem[1], (char *) &( *(vsp[0])), false, true);
 					*stack_pointer -= 1;
@@ -612,7 +612,7 @@ int machine::getTicket(){
 			break;
 
 			case POP_FLAGS:
-				*ip += 2;
+				*ip += 3;
 				if(sp[0]){
 					return this->execute(instruction, (char *) ((int *) &(this->registers[2])), (char *) &( *(vsp[0])), true, true);
 					*stack_pointer -= 1;
@@ -625,7 +625,7 @@ int machine::getTicket(){
 			case DEC_REG:
 			case NEG_REG:
 			case NOT_REG:
-				*ip += 2;
+				*ip += 3;
 				if(reg[1]){
 					int value2 = 1;
 					if(instruction == NEG_REG)
@@ -640,7 +640,7 @@ int machine::getTicket(){
 			case DEC_MEM:
 			case NEG_MEM:
 			case NOT_MEM:
-				*ip += 2;
+				*ip += 3;
 				if(mem[1]){
 					int value2 = 1;
 					if(instruction == NEG_MEM)
@@ -676,7 +676,7 @@ int machine::getTicket(){
 			case SETNE_REG:
 
 			case JUMP_REG:
-				*ip += 2;
+				*ip += 3;
 				if(reg[1]){
 					if( instruction == JUMP_REG )
 						return this->execute(instruction, (char *) &( *(vreg[1])), (char *) &( *(ip)), true, true);
@@ -688,7 +688,7 @@ int machine::getTicket(){
 			break;
 
 			case CALL_REG:
-				*ip += 2;
+				*ip += 3;
 				if(reg[1] && sp[1]){
 					return this->execute(instruction, (char *) &( *(vsp[1])), (char *) &( *(vreg[1])), true, true);
 					*stack_pointer += 1;
@@ -722,7 +722,7 @@ int machine::getTicket(){
 			case SETNE_MEM:
 
 			case JUMP_MEM:
-				*ip += 2;
+				*ip += 3;
 				if(mem[1]){
 					if( instruction == JUMP_MEM )
 						return this->execute(instruction, vmem[1], (char *) &( *(ip)), false, true);
@@ -734,7 +734,7 @@ int machine::getTicket(){
 			break;
 
 			case CALL_MEM:
-				*ip += 2;
+				*ip += 3;
 				if(mem[1] && sp[1]){
 					return this->execute(instruction, (char *) &( *(vsp[1])), vmem[1], true);
 					*stack_pointer += 1;
@@ -744,7 +744,7 @@ int machine::getTicket(){
 			break;
 
 			case RET:
-				*ip += 1;
+				*ip += 3;
 				if(sp[0]){
 					return this->execute(RET, (char *) &( *(vsp[0])), (char *) &( *(ip)), true, true);
 					*stack_pointer -= 1;
@@ -754,7 +754,7 @@ int machine::getTicket(){
 			break;
 
 			case INT_VALUE:
-				*ip += 2;
+				*ip += 3;
 				if(ins[1] && ins[2]){
 					return this->execute(INT_VALUE, vins[1], vins[2]);
 				}
@@ -785,7 +785,7 @@ int machine::getTicket(){
 			case JNA_MEM:
 			case JE_MEM:
 			case JNE_MEM:
-				ip += 2;
+				ip += 3;
 				if(mem[1]){
 					return this->execute(instruction, vmem[1], (char *) &( *(ip)), false, true);
 				}
@@ -817,7 +817,7 @@ int machine::getTicket(){
 			case JNA_VALUE:
 			case JE_VALUE:
 			case JNE_VALUE:
-				ip += 2;
+				ip += 3;
 				if(ins[1]){
 					return this->execute(instruction, vins[1], (char *) &( *(ip)), false, true);
 				}
@@ -830,7 +830,7 @@ int machine::getTicket(){
 
 			default:
 				//cout << " NOP@ " << (int) instruction << " ";
-				*ip += 1;
+				*ip += 3;
 			break;
 		}
 	}
