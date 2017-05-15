@@ -1,12 +1,12 @@
 all: debug release
 
-release: ai.h ai2machine.cpp
+release: ai.h gene.h machine.h ai2machine.cpp
 	g++ -std=c++11 -Wall -o ai2machine.exe ai2machine.cpp
 	g++ -std=c++11 -Wall -o a.exe ai2machine.cpp
 
 debug: ai2machine.exe tests
 
-ai2machine.exe: ai.h ai2machine.cpp
+ai2machine.exe: ai.h gene.h machine.h ai2machine.cpp
 	g++ -std=c++11 -Wall -g -o ai2machine.exe ai2machine.cpp
 
 tests:

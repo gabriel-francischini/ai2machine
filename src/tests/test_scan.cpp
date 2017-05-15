@@ -8,7 +8,7 @@ int main(){
 	machine machine_a;
 	machine_a.loadGene(gene_a);
 
-	int memory_limit = machine_a.memory_limit;
+	int memory_limit = machine_a.memory_limit();
 
 	for(int i=0; i<memory_limit; i++){
 		char hex_i[9] = {0, 0, 0, 0, 0, 0, 0, 0};

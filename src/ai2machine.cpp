@@ -19,6 +19,7 @@ unsigned int MAX_INT = ((int) pow(2,(sizeof(int)*8)-1));
 
 
 mt19937 my_rand(1493 + time(NULL));
+//uniform_int_distribution<int> distchar(0,(int)(pow(2,sizeof(char)*8)-1));
 //default_random_engine my_rand(1493 + time(NULL));
 
 // This one is a shared buffer for
