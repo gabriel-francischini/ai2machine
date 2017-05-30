@@ -245,18 +245,19 @@ class Machine{
 	protected:
 		int _memory_limit;
 		int _registers_limit;
-		
+		int execute(unsigned char instruction, char *value1, char *value2, 
+					bool isValue1Int = false, bool isValue2Int = false);
+		bool chkm(long int address);
+		bool chkr(long int address);
+		void printMemory();
+		void saveChanges(unsigned char instruction, int value_1, int value_2, char *value1, char *value2);
+
 
 	public:
 		char *memory;
 		int *registers;
 		int getTicket(int number);
 		int getTicket();
-		int execute(unsigned char instruction, char *value1, char *value2, 
-					bool isValue1Int = false, bool isValue2Int = false);
-		bool chkm(long int address);
-		bool chkr(long int address);
-		void printMemory();
 		void loadOnMemory(char *memory, int length);
 		void clearMemory();		
 		char *getMemory();
@@ -265,8 +266,7 @@ class Machine{
 		int *getRegisters();
 		// This function doesn't alter it's data
 		int registers_limit() const {return this->_registers_limit;}
-		void saveChanges(unsigned char instruction, int value_1, int value_2, char *value1, char *value2);
-
+		
 		virtual int interrupt(int interrupt_code, int parameter){
 			return INTERRUPT_SIGNAL;
 		}
