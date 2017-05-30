@@ -358,7 +358,7 @@ void Machine::printMemory(){
 // Function to execute int number of
 // "machine" instructions
 int Machine::getTicket(int number){
-	for(int i=0;i<=number;i++){
+	for(int i=0;i<number;i++){
 		if(this->getTicket() == ERROR_SIGNAL)
 			return ERROR_SIGNAL;	
 	}
