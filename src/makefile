@@ -10,6 +10,7 @@ pymachine.so: pymachine.cpp machine.h setup.py
 	#g++ -std=c++11 -Wall -g -o pymachine.exe pymachine.cpp -I/usr/include/python3.5 -lpython3.5m
 	python setup.py build
 	cp ./build/lib.linux-x86_64-3.5/pymachine.cpython-35m-x86_64-linux-gnu.so pymachine.so
+	cp pymachine.so ./tests/pymachine.so
 
 ai2machine.exe: ai.h gene.h machine.h ai2machine.cpp
 	g++ -std=c++11 -Wall -g -o ai2machine.exe ai2machine.cpp
